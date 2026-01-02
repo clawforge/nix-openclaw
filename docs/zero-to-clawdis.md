@@ -35,6 +35,8 @@ cd ~/code/clawdis-local
 
 Create `flake.nix`:
 
+Replace `<user>` with your Home Manager configuration name.
+
 ```nix
 {
   description = "Clawdis local";
@@ -52,7 +54,7 @@ Create `flake.nix`:
       pkgs = import nixpkgs { inherit system; };
     in {
       devShells.${system}.default = pkgs.mkShell { };
-      homeManagerConfigurations.josh = home-manager.lib.homeManagerConfiguration {
+      homeManagerConfigurations.<user> = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
         modules = [
           nix-clawdis.homeManagerModules.clawdis
@@ -85,13 +87,13 @@ nix run home-manager/release-24.11 -- init
 Then switch:
 
 ```bash
-home-manager switch --flake .#josh
+home-manager switch --flake .#<user>
 ```
 
 ## 5) Verify Clawdis
 
 ```bash
-launchctl print gui/$UID/com.joshp123.clawdis.gateway | grep state
+launchctl print gui/$UID/com.nix-clawdis.gateway | grep state
 tail -n 50 ~/.clawdis/logs/clawdis-gateway.log
 ```
 

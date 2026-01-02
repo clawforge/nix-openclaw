@@ -17,9 +17,11 @@ This is the fastest path to a working Clawdis bot.
 
 ## 2) Enable the module
 
+Replace `<user>` with your Home Manager configuration name.
+
 ```nix
 {
-  homeManagerConfigurations.josh = home-manager.lib.homeManagerConfiguration {
+  homeManagerConfigurations.<user> = home-manager.lib.homeManagerConfiguration {
     pkgs = import nixpkgs { system = "aarch64-darwin"; };
     modules = [
       nix-clawdis.homeManagerModules.clawdis
@@ -42,13 +44,13 @@ This is the fastest path to a working Clawdis bot.
 ## 3) Apply
 
 ```bash
-home-manager switch --flake .#josh
+home-manager switch --flake .#<user>
 ```
 
 ## 4) Verify
 
 ```bash
-launchctl print gui/$UID/com.joshp123.clawdis.gateway | grep state
+launchctl print gui/$UID/com.nix-clawdis.gateway | grep state
 tail -n 50 ~/.clawdis/logs/clawdis-gateway.log
 ```
 

@@ -19,6 +19,16 @@ The goal is to make Clawdis installation and configuration feel as simple as: ad
 - Deterministic builds and reproducible outputs.
 - Documentation must be suitable for publication on the internet.
 
+## 1.2) Scope boundaries (avoid confusion)
+
+This RFC is only about:
+- The public `nix-clawdis` repo (package + module + docs).
+- A generic, end-user Nix setup that lives outside any personal config repo.
+
+This RFC is explicitly **not** about:
+- Josh’s personal `nixos-config` or any private machine configuration.
+- Editing or publishing personal settings, tokens, or machine-specific modules.
+
 ## 2) Goals / Non-goals
 
 Goals:
@@ -125,13 +135,29 @@ Telegram minimal (opinionated defaults):
 }
 ```
 
+Telegram multi-chat (two groups + one DM):
+
+```nix
+{
+  programs.clawdis = {
+    enable = true;
+    providers.telegram = {
+      enable = true;
+      botTokenFile = "/run/agenix/telegram-bot-token";
+      allowFrom = [ 12345678 -1001234567890 -1009876543210 ];
+    };
+    routing.queue.mode = "interrupt";
+  };
+}
+```
+
 WhatsApp example is deferred until the Telegram-first path is fully verified.
 
 ## 6) Artifacts / outputs
 
 - `clawdis` gateway binary in PATH.
 - Declarative `~/.clawdis/clawdis.json` (generated).
-- Launchd service `com.joshp123.clawdis.gateway` (macOS).
+- Launchd service `com.nix-clawdis.gateway` (macOS).
 - Example configs inline in the RFC (Telegram-first).
 
 ## 7) State machine (if applicable)
@@ -191,6 +217,12 @@ Not applicable (no new APIs). Primary flows are CLI and provider interactions.
 - Refuse to start provider services without required tokens/credentials.
 - Strict allowlists for inbound chat IDs.
 - Emit clear, actionable error messages when config is invalid.
+
+## 12.1) Secrets handling (opinionated default)
+
+- Recommend agenix for bot tokens on macOS.
+- Default docs and examples use `/run/agenix/telegram-bot-token`.
+- Provide an example agenix entry and a note on file permissions (readable by the user running Home Manager).
 
 ## 13) Outputs and materialization
 
@@ -262,6 +294,8 @@ This RFC is complete when:
 - Telegram‑first quickstart works on macOS with a real bot token.
 - `nix run .#clawdis` launches the gateway and responds in an allowlisted chat.
 - Documentation includes a copy‑paste agent prompt and explicit verification steps.
+- Smoke test: user sends a Telegram message in an allowlisted chat and receives a response.
+- Secrets flow documented with agenix‑style token file wiring.
 - A release tag is published and referenced in examples.
 
 ## 19) Implementation status (current)

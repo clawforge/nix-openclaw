@@ -3,7 +3,7 @@
 ## Check launchd status (macOS)
 
 ```bash
-launchctl print gui/$UID/com.joshp123.clawdis.gateway
+launchctl print gui/$UID/com.nix-clawdis.gateway
 ```
 
 ## Check logs
@@ -19,5 +19,5 @@ tail -n 200 ~/.clawdis/logs/clawdis-gateway.log
 - Stuck queue: restart the launchd agent
 
 ```bash
-launchctl kickstart -k gui/$UID/com.joshp123.clawdis.gateway
+launchctl kickstart -k gui/$UID/com.nix-clawdis.gateway
 ```

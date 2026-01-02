@@ -11,6 +11,11 @@
 - **Batteries included defaults.** Safe, opinionated settings that “just work.”
 - **No mystery steps.** Every command is copy/pasteable.
 
+## Scope boundaries
+
+- This repo is a public, generic Nix package + Home Manager module for Clawdis.
+- It does not include or depend on any personal `nixos-config` or private machine setup.
+
 ## Zero to Clawdis
 
 Never used Nix? Start here:
@@ -39,7 +44,7 @@ Minimal config:
 Then:
 
 ```bash
-launchctl print gui/$UID/com.joshp123.clawdis.gateway | grep state
+launchctl print gui/$UID/com.nix-clawdis.gateway | grep state
 tail -n 50 ~/.clawdis/logs/clawdis-gateway.log
 ```
 
@@ -80,7 +85,7 @@ What I need:
 5) Configure my bot token + allowFrom list
 6) Run build + show launchd status + recent logs
 
-My setup:
+Your setup:
 - macOS version: [FILL IN]
 - Telegram bot token path: [FILL IN]
 - Allowed chat IDs: [FILL IN]

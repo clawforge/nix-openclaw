@@ -141,7 +141,7 @@ in {
     launchd.agents."clawdis.gateway" = lib.mkIf cfg.launchd.enable {
       enable = true;
       config = {
-        Label = "com.joshp123.clawdis.gateway";
+        Label = "com.nix-clawdis.gateway";
         ProgramArguments = [ "${cfg.package}/bin/clawdis" ];
         RunAtLoad = true;
         KeepAlive = true;
