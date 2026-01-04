@@ -240,8 +240,6 @@ let
     else lib.optionalAttrs cfg.enable { default = defaultInstance; };
 
   enabledInstances = lib.filterAttrs (_: inst: inst.enable) instances;
-  managedSkillsDir = "${homeDir}/.clawdbot/skills";
-
   documentsEnabled = cfg.documents != null;
 
   resolvePath = p:
@@ -257,6 +255,93 @@ let
       p;
 
   instanceWorkspaceDirs = lib.mapAttrsToList (_: inst: resolvePath inst.workspaceDir) enabledInstances;
+
+  renderSkill = skill:
+    let
+      metadataLine =
+        if skill ? clawdbot && skill.clawdbot != null
+        then "metadata: ${builtins.toJSON { clawdbot = skill.clawdbot; }}"
+        else null;
+      homepageLine =
+        if skill ? homepage && skill.homepage != null
+        then "homepage: ${skill.homepage}"
+        else null;
+      frontmatterLines = lib.filter (line: line != null) [
+        "---"
+        "name: ${skill.name}"
+        "description: ${skill.description}"
+        homepageLine
+        metadataLine
+        "---"
+      ];
+      frontmatter = lib.concatStringsSep "\n" frontmatterLines;
+      body = if skill ? body then skill.body else "";
+    in
+      "${frontmatter}\n\n${body}\n";
+
+  skillAssertions =
+    let
+      names = map (skill: skill.name) cfg.skills;
+      nameCounts = lib.foldl' (acc: name: acc // { "${name}" = (acc.${name} or 0) + 1; }) {} names;
+      duplicateNames = lib.attrNames (lib.filterAttrs (_: v: v > 1) nameCounts);
+      missingSources =
+        lib.filter (skill:
+          skill.mode != "inline" &&
+          (skill.source == null || !(builtins.pathExists (resolvePath skill.source)))
+        ) cfg.skills;
+      dupAssertions =
+        if duplicateNames == [] then [] else [
+          {
+            assertion = false;
+            message = "programs.clawdbot.skills has duplicate names: ${lib.concatStringsSep ", " duplicateNames}";
+          }
+        ];
+      sourceAssertions =
+        map (skill: {
+          assertion = false;
+          message = "programs.clawdbot.skills.${skill.name}: source missing or path does not exist.";
+        }) missingSources;
+    in
+      dupAssertions ++ sourceAssertions;
+
+  skillFiles =
+    let
+      entriesForInstance = instName: inst:
+        let
+          base = "${toRelative (resolvePath inst.workspaceDir)}/skills";
+          entryFor = skill:
+            let
+              mode = skill.mode or "symlink";
+              source = if skill ? source && skill.source != null then resolvePath skill.source else null;
+            in
+              if mode == "inline" then
+                {
+                  name = "${base}/${skill.name}/SKILL.md";
+                  value = { text = renderSkill skill; };
+                }
+              else if mode == "copy" then
+                {
+                  name = "${base}/${skill.name}";
+                  value = {
+                    source = builtins.path {
+                      name = "clawdbot-skill-${skill.name}";
+                      path = source;
+                    };
+                    recursive = true;
+                  };
+                }
+              else
+                {
+                  name = "${base}/${skill.name}";
+                  value = {
+                    source = source;
+                    recursive = true;
+                  };
+                };
+        in
+          map entryFor cfg.skills;
+    in
+      lib.listToAttrs (lib.flatten (lib.mapAttrsToList entriesForInstance enabledInstances));
 
   documentsAssertions = lib.optionals documentsEnabled [
     {
@@ -449,15 +534,19 @@ let
 
   pluginSkillsFiles =
     let
-      skillEntriesFor = p:
-        map (skillPath: {
-          name = ".clawdbot/skills/${p.name}/${builtins.baseNameOf skillPath}";
-          value = { source = skillPath; recursive = true; };
-        }) p.skills;
-      allEntries =
-        lib.flatten (lib.concatLists (lib.mapAttrsToList (_: plugins: map skillEntriesFor plugins) resolvedPluginsByInstance));
+      entriesForInstance = instName: inst:
+        let
+          base = "${toRelative (resolvePath inst.workspaceDir)}/skills";
+          skillEntriesFor = p:
+            map (skillPath: {
+              name = "${base}/${p.name}/${builtins.baseNameOf skillPath}";
+              value = { source = skillPath; recursive = true; };
+            }) p.skills;
+          plugins = resolvedPluginsByInstance.${instName} or [];
+        in
+          lib.flatten (map skillEntriesFor plugins);
     in
-      lib.listToAttrs (lib.flatten allEntries);
+      lib.listToAttrs (lib.flatten (lib.mapAttrsToList entriesForInstance enabledInstances));
 
   pluginGuards =
     let
@@ -510,13 +599,17 @@ let
   pluginSkillAssertions =
     let
       skillTargets =
-        lib.flatten (lib.concatLists (lib.mapAttrsToList (_: plugins:
-          map (p:
-            map (skillPath:
-              ".clawdbot/skills/${p.name}/${builtins.baseNameOf skillPath}"
-            ) p.skills
-          ) plugins
-        ) resolvedPluginsByInstance));
+        lib.flatten (lib.concatLists (lib.mapAttrsToList (instName: inst:
+          let
+            base = "${toRelative (resolvePath inst.workspaceDir)}/skills";
+            plugins = resolvedPluginsByInstance.${instName} or [];
+          in
+            map (p:
+              map (skillPath:
+                "${base}/${p.name}/${builtins.baseNameOf skillPath}"
+              ) p.skills
+            ) plugins
+        ) enabledInstances));
       counts = lib.foldl' (acc: path:
         acc // { "${path}" = (acc.${path} or 0) + 1; }
       ) {} skillTargets;
@@ -684,6 +777,49 @@ in {
       description = "Path to a documents directory containing AGENTS.md, SOUL.md, and TOOLS.md.";
     };
 
+    skills = lib.mkOption {
+      type = lib.types.listOf (lib.types.submodule {
+        options = {
+          name = lib.mkOption {
+            type = lib.types.str;
+            description = "Skill name (used as the directory name).";
+          };
+          description = lib.mkOption {
+            type = lib.types.str;
+            default = "";
+            description = "Short description for the skill frontmatter.";
+          };
+          homepage = lib.mkOption {
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+            description = "Optional homepage URL for the skill frontmatter.";
+          };
+          body = lib.mkOption {
+            type = lib.types.str;
+            default = "";
+            description = "Optional skill body (markdown).";
+          };
+          clawdbot = lib.mkOption {
+            type = lib.types.nullOr lib.types.attrs;
+            default = null;
+            description = "Optional clawdbot metadata for the skill frontmatter.";
+          };
+          mode = lib.mkOption {
+            type = lib.types.enum [ "symlink" "copy" "inline" ];
+            default = "symlink";
+            description = "Install mode for the skill (symlink/copy/inline).";
+          };
+          source = lib.mkOption {
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+            description = "Source path for the skill (required for symlink/copy).";
+          };
+        };
+      });
+      default = [];
+      description = "Declarative skills installed into each instance workspace.";
+    };
+
     plugins = lib.mkOption {
       type = lib.types.listOf (lib.types.submodule {
         options = {
@@ -778,7 +914,7 @@ in {
         assertion = lib.length (lib.attrNames appDefaultsEnabled) <= 1;
         message = "Only one Clawdbot instance may enable appDefaults.";
       }
-    ] ++ documentsAssertions ++ pluginAssertions ++ pluginSkillAssertions;
+    ] ++ documentsAssertions ++ skillAssertions ++ pluginAssertions ++ pluginSkillAssertions;
 
     home.packages = lib.unique (map (item: item.package) instanceConfigs);
 
@@ -793,6 +929,7 @@ in {
       })
       // (lib.listToAttrs appInstalls)
       // documentsFiles
+      // skillFiles
       // pluginSkillsFiles
       // pluginConfigFiles
       // (lib.optionalAttrs cfg.reloadScript.enable {
