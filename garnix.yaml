@@ -1,10 +1,12 @@
 builds:
   include:
-    - "packages.aarch64-darwin.clawdbot-stable"
-    - "packages.aarch64-darwin.clawdbot-gateway-stable"
+    - "packages.aarch64-darwin.clawdbot"
+    - "packages.aarch64-darwin.clawdbot-gateway"
+    - "packages.aarch64-darwin.clawdbot-tools"
     - "packages.aarch64-darwin.clawdbot-app"
-    - "packages.x86_64-linux.clawdbot-stable"
-    - "packages.x86_64-linux.clawdbot-gateway-stable"
+    - "packages.x86_64-linux.clawdbot"
+    - "packages.x86_64-linux.clawdbot-gateway"
+    - "packages.x86_64-linux.clawdbot-tools"
     - "checks.aarch64-darwin.gateway"
     - "checks.x86_64-linux.gateway"
     - "checks.x86_64-linux.gateway-tests"
