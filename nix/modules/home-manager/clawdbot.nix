@@ -446,7 +446,7 @@ let
     if documentsEnabled then
       let
           toolNames =
-            (import ../tools/extended.nix { inherit pkgs; }).toolNames or [];
+            (import ../../tools/extended.nix { inherit pkgs; }).toolNames or [];
           renderPkgName = pkg:
             if pkg ? pname then pkg.pname else lib.getName pkg;
           renderPlugin = plugin:
