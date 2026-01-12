@@ -1041,7 +1041,7 @@ in
       type = t.bool;
     };
     native = lib.mkOption {
-      type = t.bool;
+      type = t.oneOf [ t.bool t.enum [ "auto" ] ];
     };
     restart = lib.mkOption {
       type = t.bool;
@@ -1122,6 +1122,9 @@ in
         };
       }; };
       };
+      allowBots = lib.mkOption {
+        type = t.bool;
+      };
       blockStreaming = lib.mkOption {
         type = t.bool;
       };
@@ -1140,6 +1143,13 @@ in
       };
       capabilities = lib.mkOption {
         type = t.listOf (t.str);
+      };
+      commands = lib.mkOption {
+        type = t.submodule { options = {
+        native = lib.mkOption {
+          type = t.oneOf [ t.bool t.enum [ "auto" ] ];
+        };
+      }; };
       };
       dm = lib.mkOption {
         type = t.submodule { options = {
@@ -1305,6 +1315,9 @@ in
       };
     }; };
     };
+    allowBots = lib.mkOption {
+      type = t.bool;
+    };
     blockStreaming = lib.mkOption {
       type = t.bool;
     };
@@ -1323,6 +1336,13 @@ in
     };
     capabilities = lib.mkOption {
       type = t.listOf (t.str);
+    };
+    commands = lib.mkOption {
+      type = t.submodule { options = {
+      native = lib.mkOption {
+        type = t.oneOf [ t.bool t.enum [ "auto" ] ];
+      };
+    }; };
     };
     dm = lib.mkOption {
       type = t.submodule { options = {
@@ -2572,6 +2592,13 @@ in
         };
       }; });
       };
+      commands = lib.mkOption {
+        type = t.submodule { options = {
+        native = lib.mkOption {
+          type = t.oneOf [ t.bool t.enum [ "auto" ] ];
+        };
+      }; };
+      };
       dm = lib.mkOption {
         type = t.submodule { options = {
         allowFrom = lib.mkOption {
@@ -2727,6 +2754,13 @@ in
       };
     }; });
     };
+    commands = lib.mkOption {
+      type = t.submodule { options = {
+      native = lib.mkOption {
+        type = t.oneOf [ t.bool t.enum [ "auto" ] ];
+      };
+    }; };
+    };
     dm = lib.mkOption {
       type = t.submodule { options = {
       allowFrom = lib.mkOption {
@@ -2860,6 +2894,13 @@ in
       };
       capabilities = lib.mkOption {
         type = t.listOf (t.str);
+      };
+      commands = lib.mkOption {
+        type = t.submodule { options = {
+        native = lib.mkOption {
+          type = t.oneOf [ t.bool t.enum [ "auto" ] ];
+        };
+      }; };
       };
       dmHistoryLimit = lib.mkOption {
         type = t.int;
@@ -3016,6 +3057,13 @@ in
     };
     capabilities = lib.mkOption {
       type = t.listOf (t.str);
+    };
+    commands = lib.mkOption {
+      type = t.submodule { options = {
+      native = lib.mkOption {
+        type = t.oneOf [ t.bool t.enum [ "auto" ] ];
+      };
+    }; };
     };
     dmHistoryLimit = lib.mkOption {
       type = t.int;
