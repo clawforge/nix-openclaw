@@ -1158,6 +1158,9 @@ in
           };
         }; };
         };
+        configWrites = lib.mkOption {
+          type = t.bool;
+        };
         dm = lib.mkOption {
           type = t.submodule { options = {
           allowFrom = lib.mkOption {
@@ -1351,6 +1354,9 @@ in
         };
       }; };
       };
+      configWrites = lib.mkOption {
+        type = t.bool;
+      };
       dm = lib.mkOption {
         type = t.submodule { options = {
         allowFrom = lib.mkOption {
@@ -1495,6 +1501,9 @@ in
         cliPath = lib.mkOption {
           type = t.str;
         };
+        configWrites = lib.mkOption {
+          type = t.bool;
+        };
         dbPath = lib.mkOption {
           type = t.str;
         };
@@ -1574,6 +1583,9 @@ in
       };
       cliPath = lib.mkOption {
         type = t.str;
+      };
+      configWrites = lib.mkOption {
+        type = t.bool;
       };
       dbPath = lib.mkOption {
         type = t.str;
@@ -1656,6 +1668,9 @@ in
       };
       capabilities = lib.mkOption {
         type = t.listOf (t.str);
+      };
+      configWrites = lib.mkOption {
+        type = t.bool;
       };
       dmHistoryLimit = lib.mkOption {
         type = t.int;
@@ -1767,6 +1782,9 @@ in
         cliPath = lib.mkOption {
           type = t.str;
         };
+        configWrites = lib.mkOption {
+          type = t.bool;
+        };
         dmHistoryLimit = lib.mkOption {
           type = t.int;
         };
@@ -1857,6 +1875,9 @@ in
       };
       cliPath = lib.mkOption {
         type = t.str;
+      };
+      configWrites = lib.mkOption {
+        type = t.bool;
       };
       dmHistoryLimit = lib.mkOption {
         type = t.int;
@@ -2012,6 +2033,9 @@ in
             type = t.oneOf [ t.bool t.enum [ "auto" ] ];
           };
         }; };
+        };
+        configWrites = lib.mkOption {
+          type = t.bool;
         };
         dm = lib.mkOption {
           type = t.submodule { options = {
@@ -2175,6 +2199,9 @@ in
         };
       }; };
       };
+      configWrites = lib.mkOption {
+        type = t.bool;
+      };
       dm = lib.mkOption {
         type = t.submodule { options = {
         allowFrom = lib.mkOption {
@@ -2291,6 +2318,9 @@ in
             type = t.oneOf [ t.bool t.enum [ "auto" ] ];
           };
         }; };
+        };
+        configWrites = lib.mkOption {
+          type = t.bool;
         };
         dmHistoryLimit = lib.mkOption {
           type = t.int;
@@ -2457,6 +2487,9 @@ in
           type = t.oneOf [ t.bool t.enum [ "auto" ] ];
         };
       }; };
+      };
+      configWrites = lib.mkOption {
+        type = t.bool;
       };
       dmHistoryLimit = lib.mkOption {
         type = t.int;
@@ -2627,6 +2660,9 @@ in
         capabilities = lib.mkOption {
           type = t.listOf (t.str);
         };
+        configWrites = lib.mkOption {
+          type = t.bool;
+        };
         dmHistoryLimit = lib.mkOption {
           type = t.int;
         };
@@ -2723,6 +2759,9 @@ in
       };
       capabilities = lib.mkOption {
         type = t.listOf (t.str);
+      };
+      configWrites = lib.mkOption {
+        type = t.bool;
       };
       dmHistoryLimit = lib.mkOption {
         type = t.int;
