@@ -3598,6 +3598,12 @@ in
       extraDirs = lib.mkOption {
         type = t.listOf (t.str);
       };
+      watch = lib.mkOption {
+        type = t.bool;
+      };
+      watchDebounceMs = lib.mkOption {
+        type = t.int;
+      };
     }; };
     };
   }; };
