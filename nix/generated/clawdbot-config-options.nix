@@ -297,7 +297,7 @@ in
           type = t.str;
         };
         provider = lib.mkOption {
-          type = t.oneOf [ t.enum [ "openai" ] t.enum [ "local" ] ];
+          type = t.oneOf [ t.enum [ "openai" ] t.enum [ "gemini" ] t.enum [ "local" ] ];
         };
         query = lib.mkOption {
           type = t.submodule { options = {
@@ -740,7 +740,7 @@ in
           type = t.str;
         };
         provider = lib.mkOption {
-          type = t.oneOf [ t.enum [ "openai" ] t.enum [ "local" ] ];
+          type = t.oneOf [ t.enum [ "openai" ] t.enum [ "gemini" ] t.enum [ "local" ] ];
         };
         query = lib.mkOption {
           type = t.submodule { options = {
