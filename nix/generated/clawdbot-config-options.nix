@@ -4450,6 +4450,54 @@ in
     responsePrefix = lib.mkOption {
       type = t.str;
     };
+    tts = lib.mkOption {
+      type = t.submodule { options = {
+      elevenlabs = lib.mkOption {
+        type = t.submodule { options = {
+        apiKey = lib.mkOption {
+          type = t.str;
+        };
+        modelId = lib.mkOption {
+          type = t.str;
+        };
+        voiceId = lib.mkOption {
+          type = t.str;
+        };
+      }; };
+      };
+      enabled = lib.mkOption {
+        type = t.bool;
+      };
+      maxTextLength = lib.mkOption {
+        type = t.int;
+      };
+      mode = lib.mkOption {
+        type = t.enum [ "final" "all" ];
+      };
+      openai = lib.mkOption {
+        type = t.submodule { options = {
+        apiKey = lib.mkOption {
+          type = t.str;
+        };
+        model = lib.mkOption {
+          type = t.str;
+        };
+        voice = lib.mkOption {
+          type = t.str;
+        };
+      }; };
+      };
+      prefsPath = lib.mkOption {
+        type = t.str;
+      };
+      provider = lib.mkOption {
+        type = t.enum [ "elevenlabs" "openai" ];
+      };
+      timeoutMs = lib.mkOption {
+        type = t.int;
+      };
+    }; };
+    };
   }; };
   };
 
