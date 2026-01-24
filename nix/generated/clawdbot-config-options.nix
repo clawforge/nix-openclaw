@@ -240,7 +240,7 @@ in
           type = t.str;
         };
         target = lib.mkOption {
-          type = t.oneOf [ t.enum [ "last" ] t.enum [ "whatsapp" ] t.enum [ "telegram" ] t.enum [ "discord" ] t.enum [ "slack" ] t.enum [ "msteams" ] t.enum [ "signal" ] t.enum [ "imessage" ] t.enum [ "none" ] ];
+          type = t.str;
         };
         to = lib.mkOption {
           type = t.str;
@@ -712,7 +712,7 @@ in
           type = t.str;
         };
         target = lib.mkOption {
-          type = t.oneOf [ t.enum [ "last" ] t.enum [ "whatsapp" ] t.enum [ "telegram" ] t.enum [ "discord" ] t.enum [ "slack" ] t.enum [ "msteams" ] t.enum [ "signal" ] t.enum [ "imessage" ] t.enum [ "none" ] ];
+          type = t.str;
         };
         to = lib.mkOption {
           type = t.str;
