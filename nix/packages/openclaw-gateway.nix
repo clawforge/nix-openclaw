@@ -91,6 +91,25 @@ stdenv.mkDerivation (finalAttrs: {
   dontStrip = true;
   dontPatchShebangs = true;
 
+  # TODO: Remove this postFixup once upstream PR #3368 is merged and released
+  postFixup = ''
+    # Patch DM thread delivery bug (PR #3368)
+    local f="$out/lib/openclaw/dist/telegram/bot-message-context.js"
+
+    # 1. Add effectiveThreadId after the resolvedThreadId assignment (multi-line, closes with "});")
+    #    Match the closing of resolveTelegramForumThreadId({ ... }); and insert after it
+    sed -i '/const resolvedThreadId = resolveTelegramForumThreadId/,/});/{
+      /});/a\    const effectiveThreadId = isGroup ? resolvedThreadId : messageThreadId;
+    }' "$f"
+
+    # 2-3. Replace buildTypingThreadParams(resolvedThreadId) with effectiveThreadId
+    sed -i 's/buildTypingThreadParams(resolvedThreadId)/buildTypingThreadParams(effectiveThreadId)/g' "$f"
+
+    # 4. In the context return object, replace standalone resolvedThreadId, with resolvedThreadId: effectiveThreadId,
+    #    Use a pattern that excludes "messageThreadId: resolvedThreadId," (line 272)
+    sed -i '/messageThreadId: resolvedThreadId,/!s/^[[:space:]]*resolvedThreadId,/        resolvedThreadId: effectiveThreadId,/' "$f"
+  '';
+
   meta = with lib; {
     description = "Telegram-first AI gateway (Openclaw)";
     homepage = "https://github.com/openclaw/openclaw";
