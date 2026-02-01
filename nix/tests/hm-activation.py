@@ -26,5 +26,8 @@ except Exception:
     )
     machine.succeed("tail -n 200 /tmp/openclaw/openclaw-gateway.log || true")
     machine.succeed("tail -n 200 /tmp/openclaw/openclaw.log || true")
+    machine.succeed("ls -la /tmp/openclaw || true")
+    machine.succeed("ls -la /tmp/openclaw/node-report* || true")
+    machine.succeed("tail -n 200 /tmp/openclaw/node-report* || true")
     machine.succeed("coredumpctl info --no-pager | tail -n 200 || true")
     raise

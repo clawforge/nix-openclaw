@@ -23,7 +23,7 @@ pkgs.testers.nixosTest {
       home-manager = {
         useGlobalPkgs = true;
         useUserPackages = true;
-        users.alice = { ... }:
+        users.alice = { lib, ... }:
           {
             imports = [ openclawModule ];
 
@@ -53,6 +53,18 @@ pkgs.testers.nixosTest {
                 };
               };
             };
+
+            systemd.user.services."openclaw-gateway".Service.Environment = lib.mkAfter [
+              "OPENCLAW_SKIP_BROWSER_CONTROL_SERVER=1"
+              "OPENCLAW_SKIP_CANVAS_HOST=1"
+              "OPENCLAW_SKIP_CHANNELS=1"
+              "OPENCLAW_SKIP_CRON=1"
+              "OPENCLAW_SKIP_GMAIL_WATCHER=1"
+              "NODE_OPTIONS=--report-on-fatalerror --report-on-signal"
+              "NODE_REPORT_DIRECTORY=/tmp/openclaw"
+              "NODE_REPORT_FILENAME=node-report.%p.json"
+              "NODE_REPORT_SIGNAL=SIGABRT"
+            ];
           };
       };
     };
