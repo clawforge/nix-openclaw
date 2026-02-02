@@ -53,6 +53,12 @@ let
     else
       value;
 
+  baseConfig = {
+    gateway = {
+      mode = "local";
+    };
+  };
+
   mkInstanceConfig = name: inst: let
     gatewayPackage =
       if inst.gatewayPath != null then
@@ -67,7 +73,7 @@ let
         inst.package;
     pluginPackages = plugins.pluginPackagesFor name;
     pluginEnvAll = plugins.pluginEnvAllFor name;
-    mergedConfig = stripNulls (lib.recursiveUpdate cfg.config inst.config);
+    mergedConfig = stripNulls (lib.recursiveUpdate (lib.recursiveUpdate baseConfig cfg.config) inst.config);
     configJson = builtins.toJSON mergedConfig;
     configFile = pkgs.writeText "openclaw-${name}.json" configJson;
     gatewayWrapper = pkgs.writeShellScriptBin "openclaw-gateway-${name}" ''
@@ -126,6 +132,10 @@ let
           StandardErrorPath = inst.logPath;
           EnvironmentVariables = {
             HOME = homeDir;
+            OPENCLAW_CONFIG_PATH = inst.configPath;
+            OPENCLAW_STATE_DIR = inst.stateDir;
+            OPENCLAW_IMAGE_BACKEND = "sips";
+            OPENCLAW_NIX_MODE = "1";
             MOLTBOT_CONFIG_PATH = inst.configPath;
             MOLTBOT_STATE_DIR = inst.stateDir;
             MOLTBOT_IMAGE_BACKEND = "sips";
@@ -151,6 +161,9 @@ let
           RestartSec = "1s";
           Environment = [
             "HOME=${homeDir}"
+            "OPENCLAW_CONFIG_PATH=${inst.configPath}"
+            "OPENCLAW_STATE_DIR=${inst.stateDir}"
+            "OPENCLAW_NIX_MODE=1"
             "MOLTBOT_CONFIG_PATH=${inst.configPath}"
             "MOLTBOT_STATE_DIR=${inst.stateDir}"
             "MOLTBOT_NIX_MODE=1"
@@ -218,13 +231,12 @@ in {
     );
 
     home.activation.openclawDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      /bin/mkdir -p ${lib.concatStringsSep " " (lib.concatMap (item: item.dirs) instanceConfigs)}
-      ${lib.optionalString (plugins.pluginStateDirsAll != []) "/bin/mkdir -p ${lib.concatStringsSep " " plugins.pluginStateDirsAll}"}
+      run --quiet ${lib.getExe' pkgs.coreutils "mkdir"} -p ${lib.concatStringsSep " " (lib.concatMap (item: item.dirs) instanceConfigs)}
+      ${lib.optionalString (plugins.pluginStateDirsAll != []) "run --quiet ${lib.getExe' pkgs.coreutils "mkdir"} -p ${lib.concatStringsSep " " plugins.pluginStateDirsAll}"}
     '';
 
     home.activation.openclawConfigFiles = lib.hm.dag.entryAfter [ "openclawDirs" ] ''
-      set -euo pipefail
-      ${lib.concatStringsSep "\n" (map (item: "/bin/ln -sfn ${item.configFile} ${item.configPath}") instanceConfigs)}
+      ${lib.concatStringsSep "\n" (map (item: "run --quiet ${lib.getExe' pkgs.coreutils "ln"} -sfn ${item.configFile} ${item.configPath}") instanceConfigs)}
     '';
 
     home.activation.openclawPluginGuard = lib.hm.dag.entryAfter [ "writeBoundary" ] ''

@@ -444,7 +444,8 @@ Deliverables: flake output, env overrides, AGENTS.md, skill update.
 
 1. **Telegram bot token file** - create via [@BotFather](https://t.me/BotFather), set `channels.telegram.tokenFile`
 2. **Your Telegram user ID** - get from [@userinfobot](https://t.me/userinfobot), set `channels.telegram.allowFrom`
-3. **Provider API keys** - set via environment (e.g., `ANTHROPIC_API_KEY`) or `config.env.vars` (avoid secrets in store)
+3. **Gateway auth token** - set `gateway.auth.token` (or `OPENCLAW_GATEWAY_TOKEN`) for the local gateway
+4. **Provider API keys** - set via environment (e.g., `ANTHROPIC_API_KEY`) or `config.env.vars` (avoid secrets in store)
 
 That's it. Everything else has sensible defaults.
 
@@ -457,6 +458,13 @@ The simplest setup:
   programs.openclaw = {
     enable = true;
     config = {
+      gateway = {
+        mode = "local";
+        auth = {
+          token = "<gatewayToken>"; # or set OPENCLAW_GATEWAY_TOKEN
+        };
+      };
+
       channels.telegram = {
         tokenFile = "/run/agenix/telegram-bot-token"; # any file path works
         allowFrom = [ 12345678 ];  # your Telegram user ID
@@ -482,6 +490,13 @@ Uses `instances.default` to unlock per-group mention rules. If `instances` is se
   programs.openclaw = {
     documents = ./documents;
     config = {
+      gateway = {
+        mode = "local";
+        auth = {
+          token = "<gatewayToken>"; # or set OPENCLAW_GATEWAY_TOKEN
+        };
+      };
+
       channels.telegram = {
         tokenFile = "/run/agenix/telegram-bot-token";
         allowFrom = [

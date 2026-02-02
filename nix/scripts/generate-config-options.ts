@@ -150,13 +150,13 @@ const baseTypeForSchema = (schemaObj: JsonSchema, indent: string): string => {
 
   if (schema.anyOf && Array.isArray(schema.anyOf) && schema.anyOf.length > 0) {
     const entries = schema.anyOf as JsonSchema[];
-    const parts = entries.map((entry) => typeForSchema(entry, indent)).join(" ");
+    const parts = entries.map((entry) => `(${typeForSchema(entry, indent)})`).join(" ");
     return `t.oneOf [ ${parts} ]`;
   }
 
   if (schema.oneOf && Array.isArray(schema.oneOf) && schema.oneOf.length > 0) {
     const entries = schema.oneOf as JsonSchema[];
-    const parts = entries.map((entry) => typeForSchema(entry, indent)).join(" ");
+    const parts = entries.map((entry) => `(${typeForSchema(entry, indent)})`).join(" ");
     return `t.oneOf [ ${parts} ]`;
   }
 
@@ -166,7 +166,9 @@ const baseTypeForSchema = (schemaObj: JsonSchema, indent: string): string => {
 
   const schemaType = schema.type;
   if (Array.isArray(schemaType) && schemaType.length > 0) {
-    const parts = schemaType.map((entry) => typeForSchema({ type: entry }, indent)).join(" ");
+    const parts = schemaType
+      .map((entry) => `(${typeForSchema({ type: entry }, indent)})`)
+      .join(" ");
     return `t.oneOf [ ${parts} ]`;
   }
 
