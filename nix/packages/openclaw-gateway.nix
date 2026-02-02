@@ -24,6 +24,14 @@ let
   sourceFetch = lib.removeAttrs sourceInfo [ "pnpmDepsHash" ];
   pnpmPlatform = if stdenv.hostPlatform.isDarwin then "darwin" else "linux";
   pnpmArch = if stdenv.hostPlatform.isAarch64 then "arm64" else "x64";
+  # Native binary for Matrix E2EE support (@matrix-org/matrix-sdk-crypto-nodejs)
+  matrixCryptoNative = fetchurl {
+    url = "https://github.com/matrix-org/matrix-rust-sdk-crypto-nodejs/releases/download/v0.4.0/matrix-sdk-crypto.${pnpmPlatform}-${pnpmArch}.node";
+    hash = if pnpmPlatform == "darwin" && pnpmArch == "arm64"
+      then "sha256-9/X99ikki9q5NOUDj3KL+7OzYfOhSiTtGAZhCMEpry8="
+      else lib.fakeHash;
+  };
+
   nodeAddonApi = stdenv.mkDerivation {
     pname = "node-addon-api";
     version = "8.5.0";
@@ -108,6 +116,18 @@ stdenv.mkDerivation (finalAttrs: {
     # 4. In the context return object, replace standalone resolvedThreadId, with resolvedThreadId: effectiveThreadId,
     #    Use a pattern that excludes "messageThreadId: resolvedThreadId," (line 272)
     sed -i '/messageThreadId: resolvedThreadId,/!s/^[[:space:]]*resolvedThreadId,/        resolvedThreadId: effectiveThreadId,/' "$f"
+
+    # 5. Fix draft streaming in DM threads: skip resolveBotTopicsEnabled check for private chats
+    local d="$out/lib/openclaw/dist/telegram/bot-message-dispatch.js"
+    sed -i 's/typeof resolvedThreadId === "number" &&/typeof resolvedThreadId === "number" \&\&/' "$d"
+    sed -i 's/(await resolveBotTopicsEnabled(primaryCtx));/(isPrivateChat || (await resolveBotTopicsEnabled(primaryCtx)));/' "$d"
+
+    # Install native Matrix E2EE crypto binary
+    local crypto_pkg
+    crypto_pkg="$(find "$out/lib/openclaw/node_modules/.pnpm" -path "*/node_modules/@matrix-org/matrix-sdk-crypto-nodejs" -print | head -n 1)"
+    if [ -n "$crypto_pkg" ]; then
+      cp "${matrixCryptoNative}" "$crypto_pkg/matrix-sdk-crypto.${pnpmPlatform}-${pnpmArch}.node"
+    fi
   '';
 
   meta = with lib; {
