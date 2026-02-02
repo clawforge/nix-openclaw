@@ -24,14 +24,6 @@ let
   sourceFetch = lib.removeAttrs sourceInfo [ "pnpmDepsHash" ];
   pnpmPlatform = if stdenv.hostPlatform.isDarwin then "darwin" else "linux";
   pnpmArch = if stdenv.hostPlatform.isAarch64 then "arm64" else "x64";
-  # Native binary for Matrix E2EE support (@matrix-org/matrix-sdk-crypto-nodejs)
-  matrixCryptoNative = fetchurl {
-    url = "https://github.com/matrix-org/matrix-rust-sdk-crypto-nodejs/releases/download/v0.4.0/matrix-sdk-crypto.${pnpmPlatform}-${pnpmArch}.node";
-    hash = if pnpmPlatform == "darwin" && pnpmArch == "arm64"
-      then "sha256-9/X99ikki9q5NOUDj3KL+7OzYfOhSiTtGAZhCMEpry8="
-      else lib.fakeHash;
-  };
-
   nodeAddonApi = stdenv.mkDerivation {
     pname = "node-addon-api";
     version = "8.5.0";
@@ -122,34 +114,8 @@ stdenv.mkDerivation (finalAttrs: {
     sed -i 's/typeof resolvedThreadId === "number" &&/typeof resolvedThreadId === "number" \&\&/' "$d"
     sed -i 's/(await resolveBotTopicsEnabled(primaryCtx));/(isPrivateChat || (await resolveBotTopicsEnabled(primaryCtx)));/' "$d"
 
-    # Install native Matrix E2EE crypto binary
-    local crypto_pkg
-    crypto_pkg="$(find "$out/lib/openclaw/node_modules/.pnpm" -path "*/node_modules/@matrix-org/matrix-sdk-crypto-nodejs" -print | head -n 1)"
-    if [ -n "$crypto_pkg" ]; then
-      cp "${matrixCryptoNative}" "$crypto_pkg/matrix-sdk-crypto.${pnpmPlatform}-${pnpmArch}.node"
-    fi
-
-    # Patch Matrix E2EE cross-signing: enable SignatureUpload in RustEngine
-    # The SDK throws on SignatureUpload requests, preventing cross-signing bootstrap.
-    # This implements the handler following the same pattern as processKeysUploadRequest.
-    local rustEngine
-    rustEngine="$(find "$out/lib/openclaw/node_modules/.pnpm" -path "*/@vector-im/matrix-bot-sdk/lib/e2ee/RustEngine.js" -print | head -n 1)"
-    if [ -n "$rustEngine" ]; then
-      sed -i 's|case 4 /\* RequestType.SignatureUpload \*/:|case 4 /* RequestType.SignatureUpload */:|' "$rustEngine"
-      sed -i '/case 4 \/\* RequestType.SignatureUpload \*\/:/,/throw new Error/{
-        s|throw new Error("Bindings error: Backup feature not possible");|const sigBody = JSON.parse(request.body); const sigResp = await this.client.doRequest("POST", "/_matrix/client/v3/keys/signatures/upload", null, sigBody); await this.machine.markRequestAsSent(request.id, request.type, JSON.stringify(sigResp)); break;|
-      }' "$rustEngine"
-    fi
-
-    # Patch Matrix E2EE: replace broken requestOwnUserVerification with bootstrapCrossSigning
-    # The bot-sdk doesn't expose requestOwnUserVerification. Instead, we bootstrap
-    # cross-signing via the OlmMachine which self-signs the device.
-    local matrixMonitor="$out/lib/openclaw/extensions/matrix/src/matrix/monitor/index.ts"
-    if [ -f "$matrixMonitor" ]; then
-      sed -i 's|const verificationRequest = await client.crypto.requestOwnUserVerification();|await (client.crypto as any).engine.machine.bootstrapCrossSigning(true); await (client.crypto as any).engine.run();|' "$matrixMonitor"
-      sed -i 's|if (verificationRequest) {|if (true) {|' "$matrixMonitor"
-      sed -i 's|"matrix: device verification requested - please verify in another client"|"matrix: cross-signing bootstrapped - device self-verified"|' "$matrixMonitor"
-    fi
+    # Remove bundled matrix extension — installed separately via npm plugin
+    rm -rf "$out/lib/openclaw/extensions/matrix"
   '';
 
   meta = with lib; {
