@@ -116,6 +116,18 @@ stdenv.mkDerivation (finalAttrs: {
     sed -i 's/typeof resolvedThreadId === "number" &&/typeof resolvedThreadId === "number" \&\&/' "$d"
     sed -i 's/(await resolveBotTopicsEnabled(primaryCtx));/(isPrivateChat || (await resolveBotTopicsEnabled(primaryCtx)));/' "$d"
 
+    # Fix missing pnpm virtual store symlink: form-data requires hasown but
+    # nix pnpm fetch doesn't create the link in the virtual store.
+    local pnpm="$out/lib/openclaw/node_modules/.pnpm"
+    local hasown_ver=$(basename "$(ls -d "$pnpm"/hasown@* 2>/dev/null | head -1)" 2>/dev/null)
+    if [ -n "$hasown_ver" ]; then
+      for fd in "$pnpm"/form-data@*/node_modules; do
+        if [ -d "$fd" ] && [ ! -e "$fd/hasown" ]; then
+          ln -s "../../$hasown_ver/node_modules/hasown" "$fd/hasown"
+        fi
+      done
+    fi
+
     # Remove bundled matrix extension — installed separately via npm plugin
     rm -rf "$out/lib/openclaw/extensions/matrix"
   '';
