@@ -82,6 +82,8 @@ stdenv.mkDerivation (finalAttrs: {
     GATEWAY_PREBUILD_SH = "${../scripts/gateway-prebuild.sh}";
     PROMOTE_PNPM_INTEGRITY_SH = "${../scripts/promote-pnpm-integrity.sh}";
     REMOVE_PACKAGE_MANAGER_FIELD_SH = "${../scripts/remove-package-manager-field.sh}";
+    PATCH_CLIPBOARD_SH = "${../scripts/patch-clipboard.sh}";
+    PATCH_CLIPBOARD_WRAPPER = "${../scripts/clipboard-wrapper.cjs}";
     STDENV_SETUP = "${stdenv}/setup";
   };
 

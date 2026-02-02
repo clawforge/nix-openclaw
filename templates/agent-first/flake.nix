@@ -33,6 +33,14 @@
 
               # Schema-typed Openclaw config (from upstream)
               config = {
+                gateway = {
+                  mode = "local";
+                  auth = {
+                    # REPLACE: long random token for gateway auth
+                    token = "<gatewayToken>";
+                  };
+                };
+
                 channels.telegram = {
                   # REPLACE: path to your bot token file
                   tokenFile = "<tokenPath>";
