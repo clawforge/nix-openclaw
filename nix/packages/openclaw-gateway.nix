@@ -93,45 +93,6 @@ stdenv.mkDerivation (finalAttrs: {
   dontStrip = true;
   dontPatchShebangs = true;
 
-  # TODO: Remove this postFixup once upstream PR #3368 is merged and released
-  postFixup = ''
-    # Patch DM thread delivery bug (PR #3368)
-    local f="$out/lib/openclaw/dist/telegram/bot-message-context.js"
-
-    # 1. Add effectiveThreadId after the resolvedThreadId assignment (multi-line, closes with "});")
-    #    Match the closing of resolveTelegramForumThreadId({ ... }); and insert after it
-    sed -i '/const resolvedThreadId = resolveTelegramForumThreadId/,/});/{
-      /});/a\    const effectiveThreadId = isGroup ? resolvedThreadId : messageThreadId;
-    }' "$f"
-
-    # 2-3. Replace buildTypingThreadParams(resolvedThreadId) with effectiveThreadId
-    sed -i 's/buildTypingThreadParams(resolvedThreadId)/buildTypingThreadParams(effectiveThreadId)/g' "$f"
-
-    # 4. In the context return object, replace standalone resolvedThreadId, with resolvedThreadId: effectiveThreadId,
-    #    Use a pattern that excludes "messageThreadId: resolvedThreadId," (line 272)
-    sed -i '/messageThreadId: resolvedThreadId,/!s/^[[:space:]]*resolvedThreadId,/        resolvedThreadId: effectiveThreadId,/' "$f"
-
-    # 5. Fix draft streaming in DM threads: skip resolveBotTopicsEnabled check for private chats
-    local d="$out/lib/openclaw/dist/telegram/bot-message-dispatch.js"
-    sed -i 's/typeof resolvedThreadId === "number" &&/typeof resolvedThreadId === "number" \&\&/' "$d"
-    sed -i 's/(await resolveBotTopicsEnabled(primaryCtx));/(isPrivateChat || (await resolveBotTopicsEnabled(primaryCtx)));/' "$d"
-
-    # Fix missing pnpm virtual store symlink: form-data requires hasown but
-    # nix pnpm fetch doesn't create the link in the virtual store.
-    local pnpm="$out/lib/openclaw/node_modules/.pnpm"
-    local hasown_ver=$(basename "$(ls -d "$pnpm"/hasown@* 2>/dev/null | head -1)" 2>/dev/null)
-    if [ -n "$hasown_ver" ]; then
-      for fd in "$pnpm"/form-data@*/node_modules; do
-        if [ -d "$fd" ] && [ ! -e "$fd/hasown" ]; then
-          ln -s "../../$hasown_ver/node_modules/hasown" "$fd/hasown"
-        fi
-      done
-    fi
-
-    # Remove bundled matrix extension — installed separately via npm plugin
-    rm -rf "$out/lib/openclaw/extensions/matrix"
-  '';
-
   meta = with lib; {
     description = "Telegram-first AI gateway (Openclaw)";
     homepage = "https://github.com/openclaw/openclaw";
