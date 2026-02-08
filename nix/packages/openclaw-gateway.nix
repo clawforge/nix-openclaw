@@ -93,6 +93,20 @@ stdenv.mkDerivation (finalAttrs: {
   dontStrip = true;
   dontPatchShebangs = true;
 
+  postFixup = ''
+    # Fix missing pnpm virtual store symlink: form-data requires hasown but
+    # nix pnpm fetch doesn't create the link in the virtual store.
+    local pnpm="$out/lib/openclaw/node_modules/.pnpm"
+    local hasown_ver=$(basename "$(ls -d "$pnpm"/hasown@* 2>/dev/null | head -1)" 2>/dev/null)
+    if [ -n "$hasown_ver" ]; then
+      for fd in "$pnpm"/form-data@*/node_modules; do
+        if [ -d "$fd" ] && [ ! -e "$fd/hasown" ]; then
+          ln -s "../../$hasown_ver/node_modules/hasown" "$fd/hasown"
+        fi
+      done
+    fi
+  '';
+
   meta = with lib; {
     description = "Telegram-first AI gateway (Openclaw)";
     homepage = "https://github.com/openclaw/openclaw";
