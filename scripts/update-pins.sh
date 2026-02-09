@@ -5,6 +5,32 @@ repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 source_file="$repo_root/nix/sources/openclaw-source.nix"
 app_file="$repo_root/nix/packages/openclaw-app.nix"
 gateway_file="$repo_root/nix/packages/openclaw-gateway.nix"
+generated_config_file="$repo_root/nix/generated/openclaw-config-options.nix"
+flake_lock_file="$repo_root/flake.lock"
+tmp_src=""
+backup_dir=$(mktemp -d)
+
+cp "$source_file" "$backup_dir/openclaw-source.nix"
+cp "$app_file" "$backup_dir/openclaw-app.nix"
+cp "$gateway_file" "$backup_dir/openclaw-gateway.nix"
+cp "$generated_config_file" "$backup_dir/openclaw-config-options.nix"
+cp "$flake_lock_file" "$backup_dir/flake.lock"
+
+restore_from_backup() {
+  cp "$backup_dir/openclaw-source.nix" "$source_file"
+  cp "$backup_dir/openclaw-app.nix" "$app_file"
+  cp "$backup_dir/openclaw-gateway.nix" "$gateway_file"
+  cp "$backup_dir/openclaw-config-options.nix" "$generated_config_file"
+  cp "$backup_dir/flake.lock" "$flake_lock_file"
+}
+
+cleanup() {
+  if [[ -n "$tmp_src" ]]; then
+    rm -rf "$tmp_src"
+  fi
+  rm -rf "$backup_dir"
+}
+trap cleanup EXIT
 
 log() {
   printf '>> %s\n' "$*"
@@ -128,6 +154,11 @@ for sha in "${candidate_shas[@]}"; do
 done
 
 if [[ -z "$selected_sha" ]]; then
+  if [[ "${UPDATE_PINS_ALLOW_NO_BUILDABLE:-0}" == "1" ]]; then
+    log "No buildable upstream revision found in the last ${#candidate_shas[@]} commits; skipping update."
+    restore_from_backup
+    exit 0
+  fi
   echo "Failed to find a buildable upstream revision in the last ${#candidate_shas[@]} commits." >&2
   exit 1
 fi
@@ -184,10 +215,6 @@ fi
 
 log "Regenerating openclaw config options from upstream schema"
 tmp_src=$(mktemp -d)
-cleanup_tmp() {
-  rm -rf "$tmp_src"
-}
-trap cleanup_tmp EXIT
 if [[ -d "$selected_source_store_path" ]]; then
   cp -R "$selected_source_store_path" "$tmp_src/src"
 elif [[ -f "$selected_source_store_path" ]]; then
@@ -213,8 +240,8 @@ nix shell --extra-experimental-features "nix-command flakes" nixpkgs#nodejs_22 n
 nix shell --extra-experimental-features "nix-command flakes" nixpkgs#nodejs_22 nixpkgs#pnpm_10 -c \
   bash -c "cd '$tmp_src/src' && pnpm exec tsx '$repo_root/nix/scripts/generate-config-options.ts' --repo . --out '$repo_root/nix/generated/openclaw-config-options.nix'"
 
-cleanup_tmp
-trap - EXIT
+rm -rf "$tmp_src"
+tmp_src=""
 
 log "Building app to validate fetchzip hash"
 current_system=$(nix eval --impure --raw --expr 'builtins.currentSystem' 2>/dev/null || true)
