@@ -8,9 +8,13 @@
 let
   appPaths = lib.optional (openclaw-app != null) openclaw-app;
   appLinks = lib.optional (openclaw-app != null) "/Applications";
+  gatewayVersion = openclaw-gateway.version or "unknown";
+  appVersionSuffix = if openclaw-app != null && openclaw-app ? version
+    then "-app-${openclaw-app.version}"
+    else "";
 in
 buildEnv {
-  name = "openclaw-2.0.0-beta5";
+  name = "openclaw-${gatewayVersion}${appVersionSuffix}";
   paths = [ openclaw-gateway ] ++ appPaths ++ extendedTools;
   pathsToLink = [ "/bin" ] ++ appLinks;
 

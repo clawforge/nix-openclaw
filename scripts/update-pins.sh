@@ -4,6 +4,7 @@ set -euo pipefail
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 source_file="$repo_root/nix/sources/openclaw-source.nix"
 app_file="$repo_root/nix/packages/openclaw-app.nix"
+gateway_file="$repo_root/nix/packages/openclaw-gateway.nix"
 
 log() {
   printf '>> %s\n' "$*"
@@ -198,6 +199,14 @@ else
 fi
 chmod -R u+w "$tmp_src/src"
 
+gateway_version=$(jq -r '.version // empty' "$tmp_src/src/package.json" 2>/dev/null || true)
+if [[ -z "$gateway_version" ]]; then
+  echo "Failed to resolve gateway version from upstream package.json" >&2
+  exit 1
+fi
+log "Gateway version from upstream source: $gateway_version"
+perl -0pi -e "s|(pname = \"openclaw-gateway\";\\n  version = \")[^\"]+(\";\\n)|\\1${gateway_version}\\2|s" "$gateway_file"
+
 nix shell --extra-experimental-features "nix-command flakes" nixpkgs#nodejs_22 nixpkgs#pnpm_10 -c \
   bash -c "cd '$tmp_src/src' && pnpm install --frozen-lockfile --ignore-scripts"
 
@@ -243,13 +252,14 @@ if [[ "${UPDATE_PINS_AUTOCOMMIT:-1}" != "1" ]]; then
 fi
 
 log "Committing updated pins"
-git add "$source_file" "$app_file" "$repo_root/nix/generated/openclaw-config-options.nix" "$repo_root/flake.lock"
+git add "$source_file" "$app_file" "$gateway_file" "$repo_root/nix/generated/openclaw-config-options.nix" "$repo_root/flake.lock"
 git commit -F - <<'EOF'
 🤖 codex: bump openclaw pins (no-issue)
 
 What:
 - pin openclaw source to latest upstream main
 - refresh macOS app pin to latest release asset
+- sync gateway derivation version to upstream package version
 - update source and app hashes
 - regenerate config options from upstream schema
 
