@@ -18,73 +18,32 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Check for newer upstream release
-        id: release_check
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-
-          latest_tag="$(
-            gh api /repos/openclaw/openclaw/releases?per_page=20 --jq \
-            '[.[] | select([.assets[]?.name | (test("^Clawdbot-.*\\.zip$") and (test("dSYM") | not))] | any)][0].tag_name // empty'
-          )"
-          if [[ -z "${latest_tag}" ]]; then
-            echo "Failed to resolve latest release tag with a Clawdbot asset" >&2
-            exit 1
-          fi
-
-          current_version="$(sed -nE 's/^[[:space:]]*version = "([^"]+)";/\1/p' nix/packages/openclaw-app.nix | head -n 1)"
-          if [[ -z "${current_version}" ]]; then
-            echo "Failed to resolve current pinned app version" >&2
-            exit 1
-          fi
-
-          current_tag="v${current_version#v}"
-          safe_tag="$(printf '%s' "${latest_tag}" | tr -cd '[:alnum:]._-' )"
-
-          if [[ "${latest_tag}" == "${current_tag}" ]]; then
-            should_update="false"
-          else
-            should_update="true"
-          fi
-
-          {
-            echo "should_update=${should_update}"
-            echo "latest_tag=${latest_tag}"
-            echo "current_tag=${current_tag}"
-            echo "safe_tag=${safe_tag}"
-          } >> "$GITHUB_OUTPUT"
-
       - name: Install Nix
-        if: steps.release_check.outputs.should_update == 'true'
         uses: DeterminateSystems/nix-installer-action@v17
 
       - name: Update pins from upstream
-        if: steps.release_check.outputs.should_update == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           UPDATE_PINS_AUTOCOMMIT: "0"
         run: scripts/update-pins.sh
 
       - name: Create or update pull request
-        if: steps.release_check.outputs.should_update == 'true'
         id: create_pr
         uses: peter-evans/create-pull-request@v7
         with:
-          branch: chore/openclaw-release-${{ steps.release_check.outputs.safe_tag }}
+          branch: chore/openclaw-pins-update
           delete-branch: true
-          title: "chore: bump openclaw pins to ${{ steps.release_check.outputs.latest_tag }}"
-          commit-message: "chore: bump openclaw pins to ${{ steps.release_check.outputs.latest_tag }}"
+          title: "chore: bump openclaw pins"
+          commit-message: "chore: bump openclaw pins"
           body: |
-            Updates Openclaw pins because a new upstream release is available.
+            Automated pin update via `scripts/update-pins.sh`.
 
-            - Previous pinned release: `${{ steps.release_check.outputs.current_tag }}`
-            - New upstream release: `${{ steps.release_check.outputs.latest_tag }}`
             - Script used: `scripts/update-pins.sh`
 
       - name: Summary
         run: |
-          echo "Current release: ${{ steps.release_check.outputs.current_tag }}"
-          echo "Latest release:  ${{ steps.release_check.outputs.latest_tag }}"
-          echo "Should update:   ${{ steps.release_check.outputs.should_update }}"
+          if [[ -n "${{ steps.create_pr.outputs.pull-request-url }}" ]]; then
+            echo "Pull request: ${{ steps.create_pr.outputs.pull-request-url }}"
+          else
+            echo "No pin changes detected."
+          fi

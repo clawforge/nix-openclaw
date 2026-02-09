@@ -37,7 +37,6 @@ let
     "gogcli"
     "peekaboo"
     "camsnap"
-    "bird"
     "sag"
     "summarize"
     "openhue-cli"
