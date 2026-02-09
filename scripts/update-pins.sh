@@ -237,6 +237,11 @@ if git diff --quiet; then
   exit 0
 fi
 
+if [[ "${UPDATE_PINS_AUTOCOMMIT:-1}" != "1" ]]; then
+  log "Skipping git commit/push because UPDATE_PINS_AUTOCOMMIT=${UPDATE_PINS_AUTOCOMMIT:-1}"
+  exit 0
+fi
+
 log "Committing updated pins"
 git add "$source_file" "$app_file" "$repo_root/nix/generated/openclaw-config-options.nix" "$repo_root/flake.lock"
 git commit -F - <<'EOF'
