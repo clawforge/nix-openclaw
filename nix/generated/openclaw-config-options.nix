@@ -274,6 +274,10 @@ in
       };
       heartbeat = lib.mkOption {
         type = t.nullOr (t.submodule { options = {
+        accountId = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
         ackMaxChars = lib.mkOption {
           type = t.nullOr (t.int);
           default = null;
@@ -410,7 +414,7 @@ in
           default = null;
         };
         fallback = lib.mkOption {
-          type = t.nullOr (t.oneOf [ (t.enum [ "openai" ]) (t.enum [ "gemini" ]) (t.enum [ "local" ]) (t.enum [ "none" ]) ]);
+          type = t.nullOr (t.oneOf [ (t.enum [ "openai" ]) (t.enum [ "gemini" ]) (t.enum [ "local" ]) (t.enum [ "voyage" ]) (t.enum [ "none" ]) ]);
           default = null;
         };
         local = lib.mkOption {
@@ -431,7 +435,7 @@ in
           default = null;
         };
         provider = lib.mkOption {
-          type = t.nullOr (t.oneOf [ (t.enum [ "openai" ]) (t.enum [ "local" ]) (t.enum [ "gemini" ]) ]);
+          type = t.nullOr (t.oneOf [ (t.enum [ "openai" ]) (t.enum [ "local" ]) (t.enum [ "gemini" ]) (t.enum [ "voyage" ]) ]);
           default = null;
         };
         query = lib.mkOption {
@@ -602,6 +606,10 @@ in
         };
         params = lib.mkOption {
           type = t.nullOr (t.attrsOf (t.anything));
+          default = null;
+        };
+        streaming = lib.mkOption {
+          type = t.nullOr (t.bool);
           default = null;
         };
       }; }));
@@ -823,6 +831,10 @@ in
         }; }) ]);
           default = null;
         };
+        thinking = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
       }; });
         default = null;
       };
@@ -886,6 +898,10 @@ in
       };
       heartbeat = lib.mkOption {
         type = t.nullOr (t.submodule { options = {
+        accountId = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
         ackMaxChars = lib.mkOption {
           type = t.nullOr (t.int);
           default = null;
@@ -1025,7 +1041,7 @@ in
           default = null;
         };
         fallback = lib.mkOption {
-          type = t.nullOr (t.oneOf [ (t.enum [ "openai" ]) (t.enum [ "gemini" ]) (t.enum [ "local" ]) (t.enum [ "none" ]) ]);
+          type = t.nullOr (t.oneOf [ (t.enum [ "openai" ]) (t.enum [ "gemini" ]) (t.enum [ "local" ]) (t.enum [ "voyage" ]) (t.enum [ "none" ]) ]);
           default = null;
         };
         local = lib.mkOption {
@@ -1046,7 +1062,7 @@ in
           default = null;
         };
         provider = lib.mkOption {
-          type = t.nullOr (t.oneOf [ (t.enum [ "openai" ]) (t.enum [ "local" ]) (t.enum [ "gemini" ]) ]);
+          type = t.nullOr (t.oneOf [ (t.enum [ "openai" ]) (t.enum [ "local" ]) (t.enum [ "gemini" ]) (t.enum [ "voyage" ]) ]);
           default = null;
         };
         query = lib.mkOption {
@@ -1398,6 +1414,10 @@ in
       }; });
         default = null;
       };
+      skills = lib.mkOption {
+        type = t.nullOr (t.listOf (t.str));
+        default = null;
+      };
       subagents = lib.mkOption {
         type = t.nullOr (t.submodule { options = {
         allowAgents = lib.mkOption {
@@ -1415,6 +1435,10 @@ in
             default = null;
           };
         }; }) ]);
+          default = null;
+        };
+        thinking = lib.mkOption {
+          type = t.nullOr (t.str);
           default = null;
         };
       }; });
@@ -1704,7 +1728,7 @@ in
           type = t.str;
         };
         kind = lib.mkOption {
-          type = t.oneOf [ (t.enum [ "dm" ]) (t.enum [ "group" ]) (t.enum [ "channel" ]) ];
+          type = t.oneOf [ (t.enum [ "direct" ]) (t.enum [ "group" ]) (t.enum [ "channel" ]) (t.enum [ "dm" ]) ];
         };
       }; });
         default = null;
@@ -1781,7 +1805,7 @@ in
         type = t.str;
       };
       driver = lib.mkOption {
-        type = t.nullOr (t.oneOf [ (t.enum [ "openclaw" ]) (t.enum [ "extension" ]) ]);
+        type = t.nullOr (t.oneOf [ (t.enum [ "clawd" ]) (t.enum [ "extension" ]) ]);
         default = null;
       };
     }; }));
@@ -1984,6 +2008,10 @@ in
           default = null;
         };
         password = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
+        responsePrefix = lib.mkOption {
           type = t.nullOr (t.str);
           default = null;
         };
@@ -2206,6 +2234,10 @@ in
         type = t.nullOr (t.str);
         default = null;
       };
+      responsePrefix = lib.mkOption {
+        type = t.nullOr (t.str);
+        default = null;
+      };
       sendReadReceipts = lib.mkOption {
         type = t.nullOr (t.bool);
         default = null;
@@ -2294,6 +2326,10 @@ in
             default = null;
           };
           polls = lib.mkOption {
+            type = t.nullOr (t.bool);
+            default = null;
+          };
+          presence = lib.mkOption {
             type = t.nullOr (t.bool);
             default = null;
           };
@@ -2462,6 +2498,10 @@ in
               default = null;
             };
             enabled = lib.mkOption {
+              type = t.nullOr (t.bool);
+              default = null;
+            };
+            includeThreadStarter = lib.mkOption {
               type = t.nullOr (t.bool);
               default = null;
             };
@@ -2643,6 +2683,10 @@ in
           type = t.nullOr (t.oneOf [ (t.enum [ "off" ]) (t.enum [ "first" ]) (t.enum [ "all" ]) ]);
           default = null;
         };
+        responsePrefix = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
         retry = lib.mkOption {
           type = t.nullOr (t.submodule { options = {
           attempts = lib.mkOption {
@@ -2714,6 +2758,10 @@ in
           default = null;
         };
         polls = lib.mkOption {
+          type = t.nullOr (t.bool);
+          default = null;
+        };
+        presence = lib.mkOption {
           type = t.nullOr (t.bool);
           default = null;
         };
@@ -2882,6 +2930,10 @@ in
             default = null;
           };
           enabled = lib.mkOption {
+            type = t.nullOr (t.bool);
+            default = null;
+          };
+          includeThreadStarter = lib.mkOption {
             type = t.nullOr (t.bool);
             default = null;
           };
@@ -3061,6 +3113,10 @@ in
       };
       replyToMode = lib.mkOption {
         type = t.nullOr (t.oneOf [ (t.enum [ "off" ]) (t.enum [ "first" ]) (t.enum [ "all" ]) ]);
+        default = null;
+      };
+      responsePrefix = lib.mkOption {
+        type = t.nullOr (t.str);
         default = null;
       };
       retry = lib.mkOption {
@@ -3244,6 +3300,10 @@ in
           type = t.nullOr (t.bool);
           default = null;
         };
+        responsePrefix = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
         serviceAccount = lib.mkOption {
           type = t.nullOr (t.oneOf [ (t.str) (t.attrsOf (t.anything)) ]);
           default = null;
@@ -3418,6 +3478,10 @@ in
       };
       requireMention = lib.mkOption {
         type = t.nullOr (t.bool);
+        default = null;
+      };
+      responsePrefix = lib.mkOption {
+        type = t.nullOr (t.str);
         default = null;
       };
       serviceAccount = lib.mkOption {
@@ -3618,6 +3682,10 @@ in
           type = t.nullOr (t.str);
           default = null;
         };
+        responsePrefix = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
         service = lib.mkOption {
           type = t.nullOr (t.oneOf [ (t.enum [ "imessage" ]) (t.enum [ "sms" ]) (t.enum [ "auto" ]) ]);
           default = null;
@@ -3796,6 +3864,10 @@ in
         type = t.nullOr (t.str);
         default = null;
       };
+      responsePrefix = lib.mkOption {
+        type = t.nullOr (t.str);
+        default = null;
+      };
       service = lib.mkOption {
         type = t.nullOr (t.oneOf [ (t.enum [ "imessage" ]) (t.enum [ "sms" ]) (t.enum [ "auto" ]) ]);
         default = null;
@@ -3913,6 +3985,10 @@ in
         type = t.nullOr (t.listOf (t.str));
         default = null;
       };
+      mediaAuthAllowHosts = lib.mkOption {
+        type = t.nullOr (t.listOf (t.str));
+        default = null;
+      };
       mediaMaxMb = lib.mkOption {
         type = t.nullOr (t.number);
         default = null;
@@ -3923,6 +3999,10 @@ in
       };
       requireMention = lib.mkOption {
         type = t.nullOr (t.bool);
+        default = null;
+      };
+      responsePrefix = lib.mkOption {
+        type = t.nullOr (t.str);
         default = null;
       };
       sharePointSiteId = lib.mkOption {
@@ -4216,6 +4296,10 @@ in
           type = t.nullOr (t.oneOf [ (t.enum [ "on-start" ]) (t.enum [ "manual" ]) ]);
           default = null;
         };
+        responsePrefix = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
         sendReadReceipts = lib.mkOption {
           type = t.nullOr (t.bool);
           default = null;
@@ -4386,6 +4470,10 @@ in
       };
       receiveMode = lib.mkOption {
         type = t.nullOr (t.oneOf [ (t.enum [ "on-start" ]) (t.enum [ "manual" ]) ]);
+        default = null;
+      };
+      responsePrefix = lib.mkOption {
+        type = t.nullOr (t.str);
         default = null;
       };
       sendReadReceipts = lib.mkOption {
@@ -4692,6 +4780,10 @@ in
         };
         requireMention = lib.mkOption {
           type = t.nullOr (t.bool);
+          default = null;
+        };
+        responsePrefix = lib.mkOption {
+          type = t.nullOr (t.str);
           default = null;
         };
         signingSecret = lib.mkOption {
@@ -5038,6 +5130,10 @@ in
         type = t.nullOr (t.bool);
         default = null;
       };
+      responsePrefix = lib.mkOption {
+        type = t.nullOr (t.str);
+        default = null;
+      };
       signingSecret = lib.mkOption {
         type = t.nullOr (t.str);
         default = null;
@@ -5246,6 +5342,10 @@ in
             type = t.nullOr (t.bool);
             default = null;
           };
+          groupPolicy = lib.mkOption {
+            type = t.nullOr (t.enum [ "open" "disabled" "allowlist" ]);
+            default = null;
+          };
           requireMention = lib.mkOption {
             type = t.nullOr (t.bool);
             default = null;
@@ -5300,6 +5400,10 @@ in
             };
             enabled = lib.mkOption {
               type = t.nullOr (t.bool);
+              default = null;
+            };
+            groupPolicy = lib.mkOption {
+              type = t.nullOr (t.enum [ "open" "disabled" "allowlist" ]);
               default = null;
             };
             requireMention = lib.mkOption {
@@ -5385,6 +5489,10 @@ in
         };
         replyToMode = lib.mkOption {
           type = t.nullOr (t.oneOf [ (t.enum [ "off" ]) (t.enum [ "first" ]) (t.enum [ "all" ]) ]);
+          default = null;
+        };
+        responsePrefix = lib.mkOption {
+          type = t.nullOr (t.str);
           default = null;
         };
         retry = lib.mkOption {
@@ -5586,6 +5694,10 @@ in
           type = t.nullOr (t.bool);
           default = null;
         };
+        groupPolicy = lib.mkOption {
+          type = t.nullOr (t.enum [ "open" "disabled" "allowlist" ]);
+          default = null;
+        };
         requireMention = lib.mkOption {
           type = t.nullOr (t.bool);
           default = null;
@@ -5640,6 +5752,10 @@ in
           };
           enabled = lib.mkOption {
             type = t.nullOr (t.bool);
+            default = null;
+          };
+          groupPolicy = lib.mkOption {
+            type = t.nullOr (t.enum [ "open" "disabled" "allowlist" ]);
             default = null;
           };
           requireMention = lib.mkOption {
@@ -5725,6 +5841,10 @@ in
       };
       replyToMode = lib.mkOption {
         type = t.nullOr (t.oneOf [ (t.enum [ "off" ]) (t.enum [ "first" ]) (t.enum [ "all" ]) ]);
+        default = null;
+      };
+      responsePrefix = lib.mkOption {
+        type = t.nullOr (t.str);
         default = null;
       };
       retry = lib.mkOption {
@@ -5959,6 +6079,10 @@ in
           type = t.nullOr (t.str);
           default = null;
         };
+        responsePrefix = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
         selfChatMode = lib.mkOption {
           type = t.nullOr (t.bool);
           default = null;
@@ -6155,6 +6279,10 @@ in
         type = t.nullOr (t.str);
         default = null;
       };
+      responsePrefix = lib.mkOption {
+        type = t.nullOr (t.str);
+        default = null;
+      };
       selfChatMode = lib.mkOption {
         type = t.nullOr (t.bool);
         default = null;
@@ -6198,6 +6326,10 @@ in
     };
     nativeSkills = lib.mkOption {
       type = t.nullOr (t.oneOf [ (t.bool) (t.enum [ "auto" ]) ]);
+      default = null;
+    };
+    ownerAllowFrom = lib.mkOption {
+      type = t.nullOr (t.listOf (t.oneOf [ (t.str) (t.number) ]));
       default = null;
     };
     restart = lib.mkOption {
@@ -6331,10 +6463,6 @@ in
     };
     wideArea = lib.mkOption {
       type = t.nullOr (t.submodule { options = {
-      domain = lib.mkOption {
-        type = t.nullOr (t.str);
-        default = null;
-      };
       enabled = lib.mkOption {
         type = t.nullOr (t.bool);
         default = null;
@@ -6402,6 +6530,10 @@ in
         type = t.nullOr (t.bool);
         default = null;
       };
+      allowedOrigins = lib.mkOption {
+        type = t.nullOr (t.listOf (t.str));
+        default = null;
+      };
       basePath = lib.mkOption {
         type = t.nullOr (t.str);
         default = null;
@@ -6412,6 +6544,10 @@ in
       };
       enabled = lib.mkOption {
         type = t.nullOr (t.bool);
+        default = null;
+      };
+      root = lib.mkOption {
+        type = t.nullOr (t.str);
         default = null;
       };
     }; });
@@ -6961,6 +7097,158 @@ in
     type = t.nullOr (t.submodule { options = {
     preserveFilenames = lib.mkOption {
       type = t.nullOr (t.bool);
+      default = null;
+    };
+  }; });
+    default = null;
+  };
+
+  memory = lib.mkOption {
+    type = t.nullOr (t.submodule { options = {
+    backend = lib.mkOption {
+      type = t.nullOr (t.oneOf [ (t.enum [ "builtin" ]) (t.enum [ "qmd" ]) ]);
+      default = null;
+    };
+    citations = lib.mkOption {
+      type = t.nullOr (t.oneOf [ (t.enum [ "auto" ]) (t.enum [ "on" ]) (t.enum [ "off" ]) ]);
+      default = null;
+    };
+    qmd = lib.mkOption {
+      type = t.nullOr (t.submodule { options = {
+      command = lib.mkOption {
+        type = t.nullOr (t.str);
+        default = null;
+      };
+      includeDefaultMemory = lib.mkOption {
+        type = t.nullOr (t.bool);
+        default = null;
+      };
+      limits = lib.mkOption {
+        type = t.nullOr (t.submodule { options = {
+        maxInjectedChars = lib.mkOption {
+          type = t.nullOr (t.int);
+          default = null;
+        };
+        maxResults = lib.mkOption {
+          type = t.nullOr (t.int);
+          default = null;
+        };
+        maxSnippetChars = lib.mkOption {
+          type = t.nullOr (t.int);
+          default = null;
+        };
+        timeoutMs = lib.mkOption {
+          type = t.nullOr (t.int);
+          default = null;
+        };
+      }; });
+        default = null;
+      };
+      paths = lib.mkOption {
+        type = t.nullOr (t.listOf (t.submodule { options = {
+        name = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
+        path = lib.mkOption {
+          type = t.str;
+        };
+        pattern = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
+      }; }));
+        default = null;
+      };
+      scope = lib.mkOption {
+        type = t.nullOr (t.submodule { options = {
+        default = lib.mkOption {
+          type = t.nullOr (t.oneOf [ (t.enum [ "allow" ]) (t.enum [ "deny" ]) ]);
+          default = null;
+        };
+        rules = lib.mkOption {
+          type = t.nullOr (t.listOf (t.submodule { options = {
+          action = lib.mkOption {
+            type = t.oneOf [ (t.enum [ "allow" ]) (t.enum [ "deny" ]) ];
+          };
+          match = lib.mkOption {
+            type = t.nullOr (t.submodule { options = {
+            channel = lib.mkOption {
+              type = t.nullOr (t.str);
+              default = null;
+            };
+            chatType = lib.mkOption {
+              type = t.nullOr (t.oneOf [ (t.enum [ "direct" ]) (t.enum [ "group" ]) (t.enum [ "channel" ]) (t.enum [ "dm" ]) ]);
+              default = null;
+            };
+            keyPrefix = lib.mkOption {
+              type = t.nullOr (t.str);
+              default = null;
+            };
+          }; });
+            default = null;
+          };
+        }; }));
+          default = null;
+        };
+      }; });
+        default = null;
+      };
+      sessions = lib.mkOption {
+        type = t.nullOr (t.submodule { options = {
+        enabled = lib.mkOption {
+          type = t.nullOr (t.bool);
+          default = null;
+        };
+        exportDir = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
+        retentionDays = lib.mkOption {
+          type = t.nullOr (t.int);
+          default = null;
+        };
+      }; });
+        default = null;
+      };
+      update = lib.mkOption {
+        type = t.nullOr (t.submodule { options = {
+        commandTimeoutMs = lib.mkOption {
+          type = t.nullOr (t.int);
+          default = null;
+        };
+        debounceMs = lib.mkOption {
+          type = t.nullOr (t.int);
+          default = null;
+        };
+        embedInterval = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
+        embedTimeoutMs = lib.mkOption {
+          type = t.nullOr (t.int);
+          default = null;
+        };
+        interval = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
+        onBoot = lib.mkOption {
+          type = t.nullOr (t.bool);
+          default = null;
+        };
+        updateTimeoutMs = lib.mkOption {
+          type = t.nullOr (t.int);
+          default = null;
+        };
+        waitForBootSync = lib.mkOption {
+          type = t.nullOr (t.bool);
+          default = null;
+        };
+      }; });
+        default = null;
+      };
+    }; });
       default = null;
     };
   }; });
@@ -7595,6 +7883,23 @@ in
     };
     resetByType = lib.mkOption {
       type = t.nullOr (t.submodule { options = {
+      direct = lib.mkOption {
+        type = t.nullOr (t.submodule { options = {
+        atHour = lib.mkOption {
+          type = t.nullOr (t.int);
+          default = null;
+        };
+        idleMinutes = lib.mkOption {
+          type = t.nullOr (t.int);
+          default = null;
+        };
+        mode = lib.mkOption {
+          type = t.nullOr (t.oneOf [ (t.enum [ "daily" ]) (t.enum [ "idle" ]) ]);
+          default = null;
+        };
+      }; });
+        default = null;
+      };
       dm = lib.mkOption {
         type = t.nullOr (t.submodule { options = {
         atHour = lib.mkOption {
@@ -7675,7 +7980,7 @@ in
             default = null;
           };
           chatType = lib.mkOption {
-            type = t.nullOr (t.oneOf [ (t.enum [ "direct" ]) (t.enum [ "group" ]) (t.enum [ "channel" ]) ]);
+            type = t.nullOr (t.oneOf [ (t.enum [ "direct" ]) (t.enum [ "group" ]) (t.enum [ "channel" ]) (t.enum [ "dm" ]) ]);
             default = null;
           };
           keyPrefix = lib.mkOption {
@@ -7965,7 +8270,7 @@ in
               default = null;
             };
             chatType = lib.mkOption {
-              type = t.nullOr (t.oneOf [ (t.enum [ "direct" ]) (t.enum [ "group" ]) (t.enum [ "channel" ]) ]);
+              type = t.nullOr (t.oneOf [ (t.enum [ "direct" ]) (t.enum [ "group" ]) (t.enum [ "channel" ]) (t.enum [ "dm" ]) ]);
               default = null;
             };
             keyPrefix = lib.mkOption {
@@ -8162,7 +8467,7 @@ in
                 default = null;
               };
               chatType = lib.mkOption {
-                type = t.nullOr (t.oneOf [ (t.enum [ "direct" ]) (t.enum [ "group" ]) (t.enum [ "channel" ]) ]);
+                type = t.nullOr (t.oneOf [ (t.enum [ "direct" ]) (t.enum [ "group" ]) (t.enum [ "channel" ]) (t.enum [ "dm" ]) ]);
                 default = null;
               };
               keyPrefix = lib.mkOption {
@@ -8361,7 +8666,7 @@ in
                 default = null;
               };
               chatType = lib.mkOption {
-                type = t.nullOr (t.oneOf [ (t.enum [ "direct" ]) (t.enum [ "group" ]) (t.enum [ "channel" ]) ]);
+                type = t.nullOr (t.oneOf [ (t.enum [ "direct" ]) (t.enum [ "group" ]) (t.enum [ "channel" ]) (t.enum [ "dm" ]) ]);
                 default = null;
               };
               keyPrefix = lib.mkOption {
@@ -8642,7 +8947,7 @@ in
                 default = null;
               };
               chatType = lib.mkOption {
-                type = t.nullOr (t.oneOf [ (t.enum [ "direct" ]) (t.enum [ "group" ]) (t.enum [ "channel" ]) ]);
+                type = t.nullOr (t.oneOf [ (t.enum [ "direct" ]) (t.enum [ "group" ]) (t.enum [ "channel" ]) (t.enum [ "dm" ]) ]);
                 default = null;
               };
               keyPrefix = lib.mkOption {
@@ -8780,6 +9085,10 @@ in
           type = t.nullOr (t.int);
           default = null;
         };
+        maxCharsCap = lib.mkOption {
+          type = t.nullOr (t.int);
+          default = null;
+        };
         maxRedirects = lib.mkOption {
           type = t.nullOr (t.int);
           default = null;
@@ -8809,6 +9118,23 @@ in
           type = t.nullOr (t.bool);
           default = null;
         };
+        grok = lib.mkOption {
+          type = t.nullOr (t.submodule { options = {
+          apiKey = lib.mkOption {
+            type = t.nullOr (t.str);
+            default = null;
+          };
+          inlineCitations = lib.mkOption {
+            type = t.nullOr (t.bool);
+            default = null;
+          };
+          model = lib.mkOption {
+            type = t.nullOr (t.str);
+            default = null;
+          };
+        }; });
+          default = null;
+        };
         maxResults = lib.mkOption {
           type = t.nullOr (t.int);
           default = null;
@@ -8831,7 +9157,7 @@ in
           default = null;
         };
         provider = lib.mkOption {
-          type = t.nullOr (t.oneOf [ (t.enum [ "brave" ]) (t.enum [ "perplexity" ]) ]);
+          type = t.nullOr (t.oneOf [ (t.enum [ "brave" ]) (t.enum [ "perplexity" ]) (t.enum [ "grok" ]) ]);
           default = null;
         };
         timeoutSeconds = lib.mkOption {

@@ -39,7 +39,7 @@ in
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "openclaw-gateway";
-  version = "2026.1.30";
+  version = "2026.2.9";
 
   src = if gatewaySrc != null then gatewaySrc else fetchFromGitHub sourceFetch;
 
@@ -78,6 +78,7 @@ stdenv.mkDerivation (finalAttrs: {
     NODE_PATH = "${nodeAddonApi}/lib/node_modules:${node-gyp}/lib/node_modules";
     NODE_BIN = "${nodejs_22}/bin/node";
     PNPM_DEPS = finalAttrs.pnpmDeps;
+    NODE_LLAMA_CPP_SKIP_DOWNLOAD = "true";
     NODE_GYP_WRAPPER_SH = "${../scripts/node-gyp-wrapper.sh}";
     GATEWAY_PREBUILD_SH = "${../scripts/gateway-prebuild.sh}";
     PROMOTE_PNPM_INTEGRITY_SH = "${../scripts/promote-pnpm-integrity.sh}";

@@ -296,7 +296,7 @@ if [[ -z "$gateway_version" ]]; then
   exit 1
 fi
 log "Gateway version from upstream source: $gateway_version"
-perl -0pi -e "s|(pname = \"openclaw-gateway\";\\n  version = \")[^\"]+(\";\\n)|\\1${gateway_version}\\2|s" "$gateway_file"
+perl -0pi -e "s|^  version = \"[^\"]+\";|  version = \"${gateway_version}\";|m" "$gateway_file"
 
 nix shell --extra-experimental-features "nix-command flakes" nixpkgs#nodejs_22 nixpkgs#pnpm_10 -c \
   bash -c "cd '$tmp_src/src' && pnpm install --frozen-lockfile --ignore-scripts"
