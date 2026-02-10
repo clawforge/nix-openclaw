@@ -36,6 +36,20 @@ log() {
   printf '>> %s\n' "$*"
 }
 
+add_candidate_sha() {
+  local sha="$1"
+  local existing
+  if [[ -z "$sha" ]]; then
+    return
+  fi
+  for existing in "${candidate_shas[@]:-}"; do
+    if [[ "$existing" == "$sha" ]]; then
+      return
+    fi
+  done
+  candidate_shas+=("$sha")
+}
+
 upstream_checks_green() {
   local sha="$1"
   local checks_json
@@ -75,15 +89,57 @@ fi
 log "Updating nix-steipete-tools input"
 nix flake lock --update-input nix-steipete-tools
 
-log "Resolving openclaw main SHAs"
-mapfile -t candidate_shas < <(gh api /repos/openclaw/openclaw/commits?per_page=10 | jq -r '.[].sha' || true)
+log "Fetching latest release metadata"
+release_json=$(gh api /repos/openclaw/openclaw/releases?per_page=20 || true)
+if [[ -z "$release_json" ]]; then
+  echo "Failed to fetch release metadata" >&2
+  exit 1
+fi
+release_tag=$(
+  printf '%s' "$release_json" | jq -r \
+    '[.[] | select([.assets[]?.name | (test("^(OpenClaw|Clawdbot)-.*\\.zip$") and (test("dSYM"; "i") | not))] | any)][0].tag_name // empty'
+)
+if [[ -z "$release_tag" ]]; then
+  echo "Failed to resolve a release tag with an app zip asset" >&2
+  exit 1
+fi
+log "Latest app release tag with asset: $release_tag"
+
+app_url=$(
+  printf '%s' "$release_json" | jq -r \
+    '[.[] | select([.assets[]?.name | (test("^(OpenClaw|Clawdbot)-.*\\.zip$") and (test("dSYM"; "i") | not))] | any)][0].assets[] | select(.name | (test("^(OpenClaw|Clawdbot)-.*\\.zip$") and (test("dSYM"; "i") | not))) | .browser_download_url' \
+    | head -n 1 || true
+)
+if [[ -z "$app_url" ]]; then
+  echo "Failed to resolve app asset URL from latest release" >&2
+  exit 1
+fi
+log "App asset URL: $app_url"
+
+release_sha=$(gh api "/repos/openclaw/openclaw/commits/${release_tag}" --jq '.sha' 2>/dev/null || true)
+if [[ -n "$release_sha" ]]; then
+  log "Release tag commit SHA: $release_sha"
+fi
+
+main_candidate_count="${UPDATE_PINS_MAIN_CANDIDATES:-10}"
+if ! [[ "$main_candidate_count" =~ ^[0-9]+$ ]] || [[ "$main_candidate_count" -lt 1 ]]; then
+  main_candidate_count=10
+fi
+
+log "Resolving openclaw source candidate SHAs"
+candidate_shas=()
+add_candidate_sha "$release_sha"
+mapfile -t main_candidate_shas < <(gh api "/repos/openclaw/openclaw/commits?per_page=${main_candidate_count}" | jq -r '.[].sha' || true)
+for sha in "${main_candidate_shas[@]:-}"; do
+  add_candidate_sha "$sha"
+done
 if [[ ${#candidate_shas[@]} -eq 0 ]]; then
   latest_sha=$(git ls-remote https://github.com/openclaw/openclaw.git refs/heads/main | awk '{print $1}' || true)
   if [[ -z "$latest_sha" ]]; then
     echo "Failed to resolve openclaw main SHA" >&2
     exit 1
   fi
-  candidate_shas=("$latest_sha")
+  add_candidate_sha "$latest_sha"
 fi
 
 selected_sha=""
@@ -155,34 +211,14 @@ done
 
 if [[ -z "$selected_sha" ]]; then
   if [[ "${UPDATE_PINS_ALLOW_NO_BUILDABLE:-0}" == "1" ]]; then
-    log "No buildable upstream revision found in the last ${#candidate_shas[@]} commits; skipping update."
+    log "No buildable upstream revision found in ${#candidate_shas[@]} candidate SHAs; skipping update."
     restore_from_backup
     exit 0
   fi
-  echo "Failed to find a buildable upstream revision in the last ${#candidate_shas[@]} commits." >&2
+  echo "Failed to find a buildable upstream revision in ${#candidate_shas[@]} candidate SHAs." >&2
   exit 1
 fi
 log "Selected upstream SHA: $selected_sha"
-
-log "Fetching latest release metadata"
-release_json=$(gh api /repos/openclaw/openclaw/releases?per_page=20 || true)
-if [[ -z "$release_json" ]]; then
-  echo "Failed to fetch release metadata" >&2
-  exit 1
-fi
-release_tag=$(printf '%s' "$release_json" | jq -r '[.[] | select([.assets[]?.name | (test("^Clawdbot-.*\\.zip$") and (test("dSYM") | not))] | any)][0].tag_name // empty')
-if [[ -z "$release_tag" ]]; then
-  echo "Failed to resolve a release tag with a Clawdbot app asset" >&2
-  exit 1
-fi
-log "Latest app release tag with asset: $release_tag"
-
-app_url=$(printf '%s' "$release_json" | jq -r '[.[] | select([.assets[]?.name | (test("^Clawdbot-.*\\.zip$") and (test("dSYM") | not))] | any)][0].assets[] | select(.name | (test("^Clawdbot-.*\\.zip$") and (test("dSYM") | not))) | .browser_download_url' | head -n 1 || true)
-if [[ -z "$app_url" ]]; then
-  echo "Failed to resolve Clawdbot app asset URL from latest release" >&2
-  exit 1
-fi
-log "App asset URL: $app_url"
 
 app_prefetch=$(
   nix --extra-experimental-features "nix-command flakes" store prefetch-file --unpack --json "$app_url" 2>"/tmp/nix-prefetch-app.err" \
