@@ -36,6 +36,23 @@ log() {
   printf '>> %s\n' "$*"
 }
 
+gc_between_candidates="${UPDATE_PINS_GC_BETWEEN_CANDIDATES:-}"
+if [[ -z "$gc_between_candidates" ]]; then
+  if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
+    gc_between_candidates="1"
+  else
+    gc_between_candidates="0"
+  fi
+fi
+
+gc_nix_store() {
+  if [[ "$gc_between_candidates" != "1" ]]; then
+    return
+  fi
+  log "Running nix store gc to reclaim disk"
+  nix store gc >/dev/null 2>&1 || true
+}
+
 add_candidate_sha() {
   local sha="$1"
   local existing
@@ -162,6 +179,7 @@ for sha in "${candidate_shas[@]}"; do
     cat "/tmp/nix-prefetch-source.err" >&2 || true
     rm -f "/tmp/nix-prefetch-source.err"
     echo "Failed to resolve source hash for $sha" >&2
+    gc_nix_store
     continue
   fi
   rm -f "/tmp/nix-prefetch-source.err"
@@ -169,11 +187,13 @@ for sha in "${candidate_shas[@]}"; do
   if [[ -z "$source_hash" ]]; then
     printf '%s\n' "$source_prefetch" >&2
     echo "Failed to parse source hash for $sha" >&2
+    gc_nix_store
     continue
   fi
   source_store_path=$(printf '%s' "$source_prefetch" | jq -r '.path // .storePath // empty')
   if [[ -z "$source_store_path" ]]; then
     echo "Failed to parse source store path for $sha" >&2
+    gc_nix_store
     continue
   fi
   log "Source hash: $source_hash"
@@ -191,13 +211,21 @@ for sha in "${candidate_shas[@]}"; do
       log "pnpmDepsHash mismatch detected: $pnpm_hash"
       perl -0pi -e "s|pnpmDepsHash = \"[^\"]*\";|pnpmDepsHash = \"${pnpm_hash}\";|" "$source_file"
       if ! nix build .#openclaw-gateway --accept-flake-config >"$build_log" 2>&1; then
+        if grep -q "No space left on device" "$build_log"; then
+          log "Gateway build for $sha failed due to runner disk pressure."
+        fi
         tail -n 200 "$build_log" >&2 || true
         rm -f "$build_log"
+        gc_nix_store
         continue
       fi
     else
+      if grep -q "No space left on device" "$build_log"; then
+        log "Gateway build for $sha failed due to runner disk pressure."
+      fi
       tail -n 200 "$build_log" >&2 || true
       rm -f "$build_log"
+      gc_nix_store
       continue
     fi
   fi

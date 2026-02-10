@@ -26,6 +26,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           UPDATE_PINS_AUTOCOMMIT: "0"
           UPDATE_PINS_ALLOW_NO_BUILDABLE: "1"
+          UPDATE_PINS_MAIN_CANDIDATES: "6"
+          UPDATE_PINS_GC_BETWEEN_CANDIDATES: "1"
         run: scripts/update-pins.sh
 
       - name: Create or update pull request
