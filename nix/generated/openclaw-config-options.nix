@@ -4,6 +4,11 @@ let
   t = lib.types;
 in
 {
+  "$schema" = lib.mkOption {
+    type = t.nullOr (t.str);
+    default = null;
+  };
+
   agents = lib.mkOption {
     type = t.nullOr (t.submodule { options = {
     defaults = lib.mkOption {
@@ -2372,6 +2377,18 @@ in
         }; });
           default = null;
         };
+        activity = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
+        activityType = lib.mkOption {
+          type = t.nullOr (t.oneOf [ (t.enum [ 0 ]) (t.enum [ 1 ]) (t.enum [ 2 ]) (t.enum [ 3 ]) (t.enum [ 4 ]) (t.enum [ 5 ]) ]);
+          default = null;
+        };
+        activityUrl = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
         allowBots = lib.mkOption {
           type = t.nullOr (t.bool);
           default = null;
@@ -2695,6 +2712,10 @@ in
         }; });
           default = null;
         };
+        proxy = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
         replyToMode = lib.mkOption {
           type = t.nullOr (t.oneOf [ (t.enum [ "off" ]) (t.enum [ "first" ]) (t.enum [ "all" ]) ]);
           default = null;
@@ -2722,6 +2743,10 @@ in
             default = null;
           };
         }; });
+          default = null;
+        };
+        status = lib.mkOption {
+          type = t.nullOr (t.enum [ "online" "dnd" "idle" "invisible" ]);
           default = null;
         };
         textChunkLimit = lib.mkOption {
@@ -2814,6 +2839,18 @@ in
           default = null;
         };
       }; });
+        default = null;
+      };
+      activity = lib.mkOption {
+        type = t.nullOr (t.str);
+        default = null;
+      };
+      activityType = lib.mkOption {
+        type = t.nullOr (t.oneOf [ (t.enum [ 0 ]) (t.enum [ 1 ]) (t.enum [ 2 ]) (t.enum [ 3 ]) (t.enum [ 4 ]) (t.enum [ 5 ]) ]);
+        default = null;
+      };
+      activityUrl = lib.mkOption {
+        type = t.nullOr (t.str);
         default = null;
       };
       allowBots = lib.mkOption {
@@ -3139,6 +3176,10 @@ in
       }; });
         default = null;
       };
+      proxy = lib.mkOption {
+        type = t.nullOr (t.str);
+        default = null;
+      };
       replyToMode = lib.mkOption {
         type = t.nullOr (t.oneOf [ (t.enum [ "off" ]) (t.enum [ "first" ]) (t.enum [ "all" ]) ]);
         default = null;
@@ -3166,6 +3207,10 @@ in
           default = null;
         };
       }; });
+        default = null;
+      };
+      status = lib.mkOption {
+        type = t.nullOr (t.enum [ "online" "dnd" "idle" "invisible" ]);
         default = null;
       };
       textChunkLimit = lib.mkOption {
@@ -6058,6 +6103,10 @@ in
           type = t.nullOr (t.str);
           default = null;
         };
+        webhookHost = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
         webhookPath = lib.mkOption {
           type = t.nullOr (t.str);
           default = null;
@@ -6407,6 +6456,10 @@ in
         default = null;
       };
       tokenFile = lib.mkOption {
+        type = t.nullOr (t.str);
+        default = null;
+      };
+      webhookHost = lib.mkOption {
         type = t.nullOr (t.str);
         default = null;
       };
@@ -7320,6 +7373,19 @@ in
     }; });
       default = null;
     };
+    tools = lib.mkOption {
+      type = t.nullOr (t.submodule { options = {
+      allow = lib.mkOption {
+        type = t.nullOr (t.listOf (t.str));
+        default = null;
+      };
+      deny = lib.mkOption {
+        type = t.nullOr (t.listOf (t.str));
+        default = null;
+      };
+    }; });
+      default = null;
+    };
     trustedProxies = lib.mkOption {
       type = t.nullOr (t.listOf (t.str));
       default = null;
@@ -8193,7 +8259,7 @@ in
     providers = lib.mkOption {
       type = t.nullOr (t.attrsOf (t.submodule { options = {
       api = lib.mkOption {
-        type = t.nullOr (t.oneOf [ (t.enum [ "openai-completions" ]) (t.enum [ "openai-responses" ]) (t.enum [ "anthropic-messages" ]) (t.enum [ "google-generative-ai" ]) (t.enum [ "github-copilot" ]) (t.enum [ "bedrock-converse-stream" ]) ]);
+        type = t.nullOr (t.oneOf [ (t.enum [ "openai-completions" ]) (t.enum [ "openai-responses" ]) (t.enum [ "anthropic-messages" ]) (t.enum [ "google-generative-ai" ]) (t.enum [ "github-copilot" ]) (t.enum [ "bedrock-converse-stream" ]) (t.enum [ "ollama" ]) ]);
         default = null;
       };
       apiKey = lib.mkOption {
@@ -8218,13 +8284,29 @@ in
       models = lib.mkOption {
         type = t.listOf (t.submodule { options = {
         api = lib.mkOption {
-          type = t.nullOr (t.oneOf [ (t.enum [ "openai-completions" ]) (t.enum [ "openai-responses" ]) (t.enum [ "anthropic-messages" ]) (t.enum [ "google-generative-ai" ]) (t.enum [ "github-copilot" ]) (t.enum [ "bedrock-converse-stream" ]) ]);
+          type = t.nullOr (t.oneOf [ (t.enum [ "openai-completions" ]) (t.enum [ "openai-responses" ]) (t.enum [ "anthropic-messages" ]) (t.enum [ "google-generative-ai" ]) (t.enum [ "github-copilot" ]) (t.enum [ "bedrock-converse-stream" ]) (t.enum [ "ollama" ]) ]);
           default = null;
         };
         compat = lib.mkOption {
           type = t.nullOr (t.submodule { options = {
           maxTokensField = lib.mkOption {
             type = t.nullOr (t.oneOf [ (t.enum [ "max_completion_tokens" ]) (t.enum [ "max_tokens" ]) ]);
+            default = null;
+          };
+          requiresAssistantAfterToolResult = lib.mkOption {
+            type = t.nullOr (t.bool);
+            default = null;
+          };
+          requiresMistralToolIds = lib.mkOption {
+            type = t.nullOr (t.bool);
+            default = null;
+          };
+          requiresThinkingAsText = lib.mkOption {
+            type = t.nullOr (t.bool);
+            default = null;
+          };
+          requiresToolResultName = lib.mkOption {
+            type = t.nullOr (t.bool);
             default = null;
           };
           supportsDeveloperRole = lib.mkOption {
@@ -8237,6 +8319,18 @@ in
           };
           supportsStore = lib.mkOption {
             type = t.nullOr (t.bool);
+            default = null;
+          };
+          supportsStrictMode = lib.mkOption {
+            type = t.nullOr (t.bool);
+            default = null;
+          };
+          supportsUsageInStreaming = lib.mkOption {
+            type = t.nullOr (t.bool);
+            default = null;
+          };
+          thinkingFormat = lib.mkOption {
+            type = t.nullOr (t.oneOf [ (t.enum [ "openai" ]) (t.enum [ "zai" ]) (t.enum [ "qwen" ]) ]);
             default = null;
           };
         }; });
