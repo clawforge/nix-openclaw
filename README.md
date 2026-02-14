@@ -677,6 +677,47 @@ Pin lives in:
 4) If green → promote to stable.  
 5) If red → keep current stable pin.
 
+### Update flake version on a running system
+
+If your config pins `nix-openclaw` in `flake.nix` (for example `?ref=v0.1.0`), bump that ref first, then refresh the lock file and apply:
+
+```bash
+# 1) From your local config repo (the one you run switch/rebuild from)
+cd ~/code/openclaw-local
+
+# 2) Update nix-openclaw ref in flake.nix (example)
+# nix-openclaw.url = "github:openclaw/nix-openclaw?ref=v0.2.0";
+
+# 3) Refresh lock for that input
+nix flake lock --update-input nix-openclaw
+
+# 4) Apply on a running setup
+home-manager switch --flake .#<user>                # Home Manager-only setup
+darwin-rebuild switch --flake .#<host>              # nix-darwin system setup
+```
+
+If you do not pin a ref and just track upstream, use:
+
+```bash
+nix flake update nix-openclaw
+```
+
+Verify after apply:
+
+```bash
+# macOS
+launchctl print gui/$UID/com.steipete.openclaw.gateway | grep state
+
+# Linux
+systemctl --user status openclaw-gateway
+```
+
+If something regresses, rollback immediately:
+
+```bash
+home-manager switch --rollback
+```
+
 ---
 
 ## Reference
