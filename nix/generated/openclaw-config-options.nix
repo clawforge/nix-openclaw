@@ -59,6 +59,10 @@ in
         type = t.nullOr (t.int);
         default = null;
       };
+      bootstrapTotalMaxChars = lib.mkOption {
+        type = t.nullOr (t.int);
+        default = null;
+      };
       cliBackends = lib.mkOption {
         type = t.nullOr (t.attrsOf (t.submodule { options = {
         args = lib.mkOption {
@@ -638,6 +642,10 @@ in
           };
           autoStartTimeoutMs = lib.mkOption {
             type = t.nullOr (t.int);
+            default = null;
+          };
+          binds = lib.mkOption {
+            type = t.nullOr (t.listOf (t.str));
             default = null;
           };
           cdpPort = lib.mkOption {
@@ -1250,6 +1258,10 @@ in
             type = t.nullOr (t.int);
             default = null;
           };
+          binds = lib.mkOption {
+            type = t.nullOr (t.listOf (t.str));
+            default = null;
+          };
           cdpPort = lib.mkOption {
             type = t.nullOr (t.int);
             default = null;
@@ -1509,6 +1521,10 @@ in
               type = t.nullOr (t.bool);
               default = null;
             };
+            workspaceOnly = lib.mkOption {
+              type = t.nullOr (t.bool);
+              default = null;
+            };
           }; });
             default = null;
           };
@@ -1540,6 +1556,10 @@ in
             type = t.nullOr (t.bool);
             default = null;
           };
+          notifyOnExitEmptySuccess = lib.mkOption {
+            type = t.nullOr (t.bool);
+            default = null;
+          };
           pathPrepend = lib.mkOption {
             type = t.nullOr (t.listOf (t.str));
             default = null;
@@ -1554,6 +1574,15 @@ in
           };
           timeoutSec = lib.mkOption {
             type = t.nullOr (t.int);
+            default = null;
+          };
+        }; });
+          default = null;
+        };
+        fs = lib.mkOption {
+          type = t.nullOr (t.submodule { options = {
+          workspaceOnly = lib.mkOption {
+            type = t.nullOr (t.bool);
             default = null;
           };
         }; });
@@ -2008,6 +2037,10 @@ in
         }; });
           default = null;
         };
+        mediaLocalRoots = lib.mkOption {
+          type = t.nullOr (t.listOf (t.str));
+          default = null;
+        };
         mediaMaxMb = lib.mkOption {
           type = t.nullOr (t.int);
           default = null;
@@ -2231,6 +2264,10 @@ in
       }; });
         default = null;
       };
+      mediaLocalRoots = lib.mkOption {
+        type = t.nullOr (t.listOf (t.str));
+        default = null;
+      };
       mediaMaxMb = lib.mkOption {
         type = t.nullOr (t.int);
         default = null;
@@ -2393,6 +2430,10 @@ in
           type = t.nullOr (t.bool);
           default = null;
         };
+        allowFrom = lib.mkOption {
+          type = t.nullOr (t.listOf (t.oneOf [ (t.str) (t.number) ]));
+          default = null;
+        };
         blockStreaming = lib.mkOption {
           type = t.nullOr (t.bool);
           default = null;
@@ -2468,6 +2509,10 @@ in
           type = t.nullOr (t.int);
           default = null;
         };
+        dmPolicy = lib.mkOption {
+          type = t.nullOr (t.enum [ "pairing" "allowlist" "open" "disabled" ]);
+          default = null;
+        };
         dms = lib.mkOption {
           type = t.nullOr (t.attrsOf (t.submodule { options = {
           historyLimit = lib.mkOption {
@@ -2501,6 +2546,10 @@ in
           };
           sessionFilter = lib.mkOption {
             type = t.nullOr (t.listOf (t.str));
+            default = null;
+          };
+          target = lib.mkOption {
+            type = t.nullOr (t.enum [ "dm" "channel" "both" ]);
             default = null;
           };
         }; });
@@ -2857,6 +2906,10 @@ in
         type = t.nullOr (t.bool);
         default = null;
       };
+      allowFrom = lib.mkOption {
+        type = t.nullOr (t.listOf (t.oneOf [ (t.str) (t.number) ]));
+        default = null;
+      };
       blockStreaming = lib.mkOption {
         type = t.nullOr (t.bool);
         default = null;
@@ -2932,6 +2985,10 @@ in
         type = t.nullOr (t.int);
         default = null;
       };
+      dmPolicy = lib.mkOption {
+        type = t.nullOr (t.enum [ "pairing" "allowlist" "open" "disabled" ]);
+        default = null;
+      };
       dms = lib.mkOption {
         type = t.nullOr (t.attrsOf (t.submodule { options = {
         historyLimit = lib.mkOption {
@@ -2965,6 +3022,10 @@ in
         };
         sessionFilter = lib.mkOption {
           type = t.nullOr (t.listOf (t.str));
+          default = null;
+        };
+        target = lib.mkOption {
+          type = t.nullOr (t.enum [ "dm" "channel" "both" ]);
           default = null;
         };
       }; });
@@ -5099,6 +5160,10 @@ in
           type = t.nullOr (t.bool);
           default = null;
         };
+        allowFrom = lib.mkOption {
+          type = t.nullOr (t.listOf (t.oneOf [ (t.str) (t.number) ]));
+          default = null;
+        };
         appToken = lib.mkOption {
           type = t.nullOr (t.str);
           default = null;
@@ -5251,6 +5316,10 @@ in
         };
         dmHistoryLimit = lib.mkOption {
           type = t.nullOr (t.int);
+          default = null;
+        };
+        dmPolicy = lib.mkOption {
+          type = t.nullOr (t.enum [ "pairing" "allowlist" "open" "disabled" ]);
           default = null;
         };
         dms = lib.mkOption {
@@ -5451,6 +5520,10 @@ in
         type = t.nullOr (t.bool);
         default = null;
       };
+      allowFrom = lib.mkOption {
+        type = t.nullOr (t.listOf (t.oneOf [ (t.str) (t.number) ]));
+        default = null;
+      };
       appToken = lib.mkOption {
         type = t.nullOr (t.str);
         default = null;
@@ -5603,6 +5676,10 @@ in
       };
       dmHistoryLimit = lib.mkOption {
         type = t.nullOr (t.int);
+        default = null;
+      };
+      dmPolicy = lib.mkOption {
+        type = t.nullOr (t.enum [ "pairing" "allowlist" "open" "disabled" ]);
         default = null;
       };
       dms = lib.mkOption {
@@ -7093,15 +7170,52 @@ in
         default = null;
       };
       mode = lib.mkOption {
-        type = t.nullOr (t.oneOf [ (t.enum [ "token" ]) (t.enum [ "password" ]) ]);
+        type = t.nullOr (t.oneOf [ (t.enum [ "token" ]) (t.enum [ "password" ]) (t.enum [ "trusted-proxy" ]) ]);
         default = null;
       };
       password = lib.mkOption {
         type = t.nullOr (t.str);
         default = null;
       };
+      rateLimit = lib.mkOption {
+        type = t.nullOr (t.submodule { options = {
+        exemptLoopback = lib.mkOption {
+          type = t.nullOr (t.bool);
+          default = null;
+        };
+        lockoutMs = lib.mkOption {
+          type = t.nullOr (t.number);
+          default = null;
+        };
+        maxAttempts = lib.mkOption {
+          type = t.nullOr (t.number);
+          default = null;
+        };
+        windowMs = lib.mkOption {
+          type = t.nullOr (t.number);
+          default = null;
+        };
+      }; });
+        default = null;
+      };
       token = lib.mkOption {
         type = t.nullOr (t.str);
+        default = null;
+      };
+      trustedProxy = lib.mkOption {
+        type = t.nullOr (t.submodule { options = {
+        allowUsers = lib.mkOption {
+          type = t.nullOr (t.listOf (t.str));
+          default = null;
+        };
+        requiredHeaders = lib.mkOption {
+          type = t.nullOr (t.listOf (t.str));
+          default = null;
+        };
+        userHeader = lib.mkOption {
+          type = t.str;
+        };
+      }; });
         default = null;
       };
     }; });
@@ -7814,6 +7928,10 @@ in
               default = null;
             };
             keyPrefix = lib.mkOption {
+              type = t.nullOr (t.str);
+              default = null;
+            };
+            rawKeyPrefix = lib.mkOption {
               type = t.nullOr (t.str);
               default = null;
             };
@@ -8680,6 +8798,10 @@ in
             type = t.nullOr (t.str);
             default = null;
           };
+          rawKeyPrefix = lib.mkOption {
+            type = t.nullOr (t.str);
+            default = null;
+          };
         }; });
           default = null;
         };
@@ -8869,6 +8991,10 @@ in
           type = t.nullOr (t.bool);
           default = null;
         };
+        workspaceOnly = lib.mkOption {
+          type = t.nullOr (t.bool);
+          default = null;
+        };
       }; });
         default = null;
       };
@@ -8896,6 +9022,10 @@ in
         type = t.nullOr (t.bool);
         default = null;
       };
+      notifyOnExitEmptySuccess = lib.mkOption {
+        type = t.nullOr (t.bool);
+        default = null;
+      };
       pathPrepend = lib.mkOption {
         type = t.nullOr (t.listOf (t.str));
         default = null;
@@ -8910,6 +9040,15 @@ in
       };
       timeoutSec = lib.mkOption {
         type = t.nullOr (t.int);
+        default = null;
+      };
+    }; });
+      default = null;
+    };
+    fs = lib.mkOption {
+      type = t.nullOr (t.submodule { options = {
+      workspaceOnly = lib.mkOption {
+        type = t.nullOr (t.bool);
         default = null;
       };
     }; });
@@ -8967,6 +9106,10 @@ in
               default = null;
             };
             keyPrefix = lib.mkOption {
+              type = t.nullOr (t.str);
+              default = null;
+            };
+            rawKeyPrefix = lib.mkOption {
               type = t.nullOr (t.str);
               default = null;
             };
@@ -9167,6 +9310,10 @@ in
                 type = t.nullOr (t.str);
                 default = null;
               };
+              rawKeyPrefix = lib.mkOption {
+                type = t.nullOr (t.str);
+                default = null;
+              };
             }; });
               default = null;
             };
@@ -9363,6 +9510,10 @@ in
                 default = null;
               };
               keyPrefix = lib.mkOption {
+                type = t.nullOr (t.str);
+                default = null;
+              };
+              rawKeyPrefix = lib.mkOption {
                 type = t.nullOr (t.str);
                 default = null;
               };
@@ -9644,6 +9795,10 @@ in
                 default = null;
               };
               keyPrefix = lib.mkOption {
+                type = t.nullOr (t.str);
+                default = null;
+              };
+              rawKeyPrefix = lib.mkOption {
                 type = t.nullOr (t.str);
                 default = null;
               };
