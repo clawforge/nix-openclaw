@@ -108,6 +108,58 @@ in
           type = t.nullOr (t.oneOf [ (t.enum [ "json" ]) (t.enum [ "text" ]) (t.enum [ "jsonl" ]) ]);
           default = null;
         };
+        reliability = lib.mkOption {
+          type = t.nullOr (t.submodule { options = {
+          watchdog = lib.mkOption {
+            type = t.nullOr (t.submodule { options = {
+            fresh = lib.mkOption {
+              type = t.nullOr (t.submodule { options = {
+              maxMs = lib.mkOption {
+                type = t.nullOr (t.int);
+                default = null;
+              };
+              minMs = lib.mkOption {
+                type = t.nullOr (t.int);
+                default = null;
+              };
+              noOutputTimeoutMs = lib.mkOption {
+                type = t.nullOr (t.int);
+                default = null;
+              };
+              noOutputTimeoutRatio = lib.mkOption {
+                type = t.nullOr (t.number);
+                default = null;
+              };
+            }; });
+              default = null;
+            };
+            resume = lib.mkOption {
+              type = t.nullOr (t.submodule { options = {
+              maxMs = lib.mkOption {
+                type = t.nullOr (t.int);
+                default = null;
+              };
+              minMs = lib.mkOption {
+                type = t.nullOr (t.int);
+                default = null;
+              };
+              noOutputTimeoutMs = lib.mkOption {
+                type = t.nullOr (t.int);
+                default = null;
+              };
+              noOutputTimeoutRatio = lib.mkOption {
+                type = t.nullOr (t.number);
+                default = null;
+              };
+            }; });
+              default = null;
+            };
+          }; });
+            default = null;
+          };
+        }; });
+          default = null;
+        };
         resumeArgs = lib.mkOption {
           type = t.nullOr (t.listOf (t.str));
           default = null;
@@ -827,9 +879,19 @@ in
           type = t.nullOr (t.int);
           default = null;
         };
+        maxChildrenPerAgent = lib.mkOption {
+          type = t.nullOr (t.int);
+          default = null;
+          description = "Maximum number of active children a single agent session can spawn (default: 5).";
+        };
         maxConcurrent = lib.mkOption {
           type = t.nullOr (t.int);
           default = null;
+        };
+        maxSpawnDepth = lib.mkOption {
+          type = t.nullOr (t.int);
+          default = null;
+          description = "Maximum nesting depth for sub-agent spawning. 1 = no nesting (default), 2 = sub-agents can spawn sub-sub-agents.";
         };
         model = lib.mkOption {
           type = t.nullOr (t.oneOf [ (t.str) (t.submodule { options = {
@@ -2333,6 +2395,10 @@ in
       type = t.nullOr (t.submodule { options = {
       accounts = lib.mkOption {
         type = t.nullOr (t.attrsOf (t.submodule { options = {
+        ackReaction = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
         actions = lib.mkOption {
           type = t.nullOr (t.submodule { options = {
           channelInfo = lib.mkOption {
@@ -2806,7 +2872,25 @@ in
           type = t.nullOr (t.str);
           default = null;
         };
+        ui = lib.mkOption {
+          type = t.nullOr (t.submodule { options = {
+          components = lib.mkOption {
+            type = t.nullOr (t.submodule { options = {
+            accentColor = lib.mkOption {
+              type = t.nullOr (t.str);
+              default = null;
+            };
+          }; });
+            default = null;
+          };
+        }; });
+          default = null;
+        };
       }; }));
+        default = null;
+      };
+      ackReaction = lib.mkOption {
+        type = t.nullOr (t.str);
         default = null;
       };
       actions = lib.mkOption {
@@ -3280,6 +3364,20 @@ in
       };
       token = lib.mkOption {
         type = t.nullOr (t.str);
+        default = null;
+      };
+      ui = lib.mkOption {
+        type = t.nullOr (t.submodule { options = {
+        components = lib.mkOption {
+          type = t.nullOr (t.submodule { options = {
+          accentColor = lib.mkOption {
+            type = t.nullOr (t.str);
+            default = null;
+          };
+        }; });
+          default = null;
+        };
+      }; });
         default = null;
       };
     }; });
@@ -5119,6 +5217,10 @@ in
       type = t.nullOr (t.submodule { options = {
       accounts = lib.mkOption {
         type = t.nullOr (t.attrsOf (t.submodule { options = {
+        ackReaction = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
         actions = lib.mkOption {
           type = t.nullOr (t.submodule { options = {
           channelInfo = lib.mkOption {
@@ -5477,6 +5579,10 @@ in
           default = null;
         };
       }; }));
+        default = null;
+      };
+      ackReaction = lib.mkOption {
+        type = t.nullOr (t.str);
         default = null;
       };
       actions = lib.mkOption {
@@ -5843,6 +5949,10 @@ in
       type = t.nullOr (t.submodule { options = {
       accounts = lib.mkOption {
         type = t.nullOr (t.attrsOf (t.submodule { options = {
+        ackReaction = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
         actions = lib.mkOption {
           type = t.nullOr (t.submodule { options = {
           deleteMessage = lib.mkOption {
@@ -6197,6 +6307,10 @@ in
           default = null;
         };
       }; }));
+        default = null;
+      };
+      ackReaction = lib.mkOption {
+        type = t.nullOr (t.str);
         default = null;
       };
       actions = lib.mkOption {
@@ -7023,6 +7137,14 @@ in
       default = null;
     };
     store = lib.mkOption {
+      type = t.nullOr (t.str);
+      default = null;
+    };
+    webhook = lib.mkOption {
+      type = t.nullOr (t.str);
+      default = null;
+    };
+    webhookToken = lib.mkOption {
       type = t.nullOr (t.str);
       default = null;
     };
@@ -8125,6 +8247,10 @@ in
     };
     responsePrefix = lib.mkOption {
       type = t.nullOr (t.str);
+      default = null;
+    };
+    suppressToolErrors = lib.mkOption {
+      type = t.nullOr (t.bool);
       default = null;
     };
     tts = lib.mkOption {
@@ -9890,6 +10016,15 @@ in
           default = null;
         };
       }; });
+        default = null;
+      };
+    }; });
+      default = null;
+    };
+    sessions = lib.mkOption {
+      type = t.nullOr (t.submodule { options = {
+      visibility = lib.mkOption {
+        type = t.nullOr (t.enum [ "self" "tree" "agent" "all" ]);
         default = null;
       };
     }; });
